@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门六合彩【前后六肖中特】稳定资料！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .win-animal {
+            color: #FF0000;
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}&_=${Date.now()}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}&_=${Date.now()}`;
+
+    let duLieuMap = {};
+
+    const QIAN_LIU_XIAO = ["鼠", "牛", "虎", "兔", "龙", "蛇"];
+    const HOU_LIU_XIAO = ["马", "羊", "猴", "鸡", "狗", "猪"];
+
+    const STATIC_PREDICTIONS = {
+        1: "后六肖+兔牛", 2: "前六肖+马猴", 3: "后六肖+蛇龙", 4: "前六肖+羊鸡", 5: "后六肖+兔牛",
+        6: "后六肖+虎蛇", 7: "前六肖+狗鸡", 8: "前六肖+猴羊", 9: "后六肖+兔牛", 10: "前六肖+猪狗",
+        11: "前六肖+鸡马", 12: "后六肖+虎牛", 13: "前六肖+猴羊", 14: "前六肖+鸡猪", 15: "后六肖+兔龙",
+        16: "后六肖+鼠牛", 17: "前六肖+狗猴", 18: "后六肖+龙虎", 19: "前六肖+猪鸡", 20: "前六肖+猴羊",
+        21: "后六肖+鼠虎", 22: "前六肖+鸡马", 23: "前六肖+羊狗", 24: "后六肖+牛虎", 25: "后六肖+兔龙",
+        26: "前六肖+马羊", 27: "后六肖+蛇虎", 28: "前六肖+鸡狗", 29: "前六肖+马猴", 30: "后六肖+牛龙",
+        31: "后六肖+兔虎", 32: "前六肖+猪猴", 33: "后六肖+龙鼠", 34: "后六肖+牛虎", 35: "前六肖+猴猪",
+        36: "前六肖+狗马", 37: "后六肖+鼠虎", 38: "后六肖+牛龙", 39: "前六肖+鸡羊", 40: "后六肖+蛇虎",
+        41: "后六肖+鼠牛", 42: "前六肖+猪狗", 43: "前六肖+猴羊", 44: "后六肖+蛇虎", 45: "前六肖+马鸡",
+        46: "前六肖+羊猪", 47: "后六肖+牛鼠", 48: "前六肖+鸡马", 49: "前六肖+猴猪", 50: "后六肖+虎牛",
+        51: "后六肖+兔龙", 52: "前六肖+猪马", 53: "后六肖+牛虎", 54: "前六肖+猴羊", 55: "后六肖+蛇兔",
+        56: "前六肖+猪马", 57: "后六肖+虎龙", 58: "前六肖+狗羊", 59: "前六肖+猪鸡", 60: "后六肖+蛇虎",
+        61: "后六肖+鼠兔", 62: "前六肖+猪狗", 63: "后六肖+蛇牛", 64: "前六肖+猴鸡", 65: "前六肖+猪羊",
+        66: "后六肖+虎蛇", 67: "后六肖+鼠牛", 68: "前六肖+猴马", 69: "前六肖+羊猪", 70: "后六肖+牛兔",
+        71: "后六肖+虎龙", 72: "前六肖+狗鸡", 73: "前六肖+羊猪", 74: "后六肖+虎牛", 75: "后六肖+鼠蛇",
+        76: "前六肖+猴猪", 77: "前六肖+鸡狗", 78: "后六肖+虎鼠", 79: "后六肖+龙兔", 80: "前六肖+狗猪",
+        81: "前六肖+猴羊", 82: "后六肖+鼠虎", 83: "后六肖+牛蛇", 84: "前六肖+猪羊", 85: "后六肖+鼠龙",
+        86: "前六肖+马鸡", 87: "后六肖+兔虎", 88: "前六肖+羊猪", 89: "前六肖+马狗", 90: "后六肖+牛虎",
+        91: "前六肖+猴猪", 92: "后六肖+鼠蛇", 93: "前六肖+马羊", 94: "后六肖+牛虎", 95: "后六肖+龙兔",
+        96: "前六肖+羊猴", 97: "前六肖+猪马", 98: "后六肖+兔虎", 99: "后六肖+鼠蛇", 100: "前六肖+猪马",
+        101: "后六肖+兔龙", 102: "后六肖+蛇牛", 103: "前六肖+狗猪", 104: "后六肖+虎鼠", 105: "后六肖+牛龙",
+        106: "前六肖+猴马", 107: "后六肖+蛇鼠", 108: "前六肖+猪鸡", 109: "后六肖+牛兔", 110: "后六肖+蛇鼠",
+        111: "前六肖+狗羊", 112: "前六肖+鸡马", 113: "后六肖+蛇虎", 114: "前六肖+狗猪", 115: "前六肖+猴羊",
+        116: "后六肖+牛兔", 117: "前六肖+马鸡", 118: "后六肖+虎蛇", 119: "后六肖+牛龙", 120: "前六肖+猪狗",
+        121: "前六肖+马猴", 122: "后六肖+兔龙", 123: "前六肖+狗猪", 124: "前六肖+羊鸡", 125: "后六肖+兔鼠",
+        126: "前六肖+马猪", 127: "后六肖+牛龙", 128: "前六肖+猴狗", 129: "后六肖+鼠虎", 130: "前六肖+马猪",
+        131: "后六肖+蛇鼠", 132: "前六肖+猪羊", 133: "后六肖+龙牛", 134: "后六肖+兔蛇", 135: "前六肖+鸡猴",
+        136: "后六肖+鼠虎", 137: "前六肖+羊狗", 138: "后六肖+蛇兔", 139: "前六肖+猴鸡", 140: "前六肖+羊狗",
+        141: "后六肖+牛龙", 142: "后六肖+鼠虎", 143: "前六肖+马狗", 144: "前六肖+羊猪", 145: "后六肖+蛇龙",
+        146: "后六肖+鼠牛", 147: "前六肖+鸡猴", 148: "前六肖+羊狗", 149: "后六肖+龙鼠", 150: "前六肖+马猴",
+        151: "前六肖+羊鸡", 152: "后六肖+牛虎", 153: "后六肖+蛇鼠", 154: "前六肖+鸡羊", 155: "前六肖+猪猴",
+        156: "后六肖+龙蛇", 157: "后六肖+鼠兔", 158: "前六肖+羊马", 159: "前六肖+狗猴", 160: "后六肖+鼠虎",
+        161: "后六肖+兔蛇", 162: "前六肖+猪猴", 163: "后六肖+龙虎", 164: "前六肖+羊鸡", 165: "前六肖+马猴",
+        166: "后六肖+龙虎", 167: "后六肖+蛇鼠", 168: "前六肖+羊猴", 169: "后六肖+牛虎", 170: "前六肖+马鸡",
+        171: "前六肖+羊猪", 172: "后六肖+龙兔", 173: "后六肖+牛鼠", 174: "前六肖+猪鸡", 175: "后六肖+蛇龙",
+        176: "前六肖+狗猴", 177: "前六肖+羊鸡", 178: "后六肖+兔牛", 179: "后六肖+蛇虎", 180: "前六肖+狗猴",
+        181: "后六肖+牛兔", 182: "后六肖+虎龙", 183: "前六肖+羊马", 184: "后六肖+蛇鼠", 185: "前六肖+鸡猪",
+        186: "后六肖+龙兔", 187: "前六肖+猴马", 188: "后六肖+虎鼠", 189: "前六肖+狗猪", 190: "后六肖+牛蛇",
+        191: "后六肖+鼠兔", 192: "前六肖+狗羊", 193: "后六肖+牛虎", 194: "前六肖+马鸡", 195: "后六肖+蛇鼠",
+        196: "后六肖+兔牛", 197: "前六肖+鸡猪", 198: "后六肖+龙蛇", 199: "前六肖+羊猴", 200: "前六肖+马猪",
+        201: "后六肖+兔虎", 202: "后六肖+龙牛", 203: "前六肖+狗猪", 204: "后六肖+鼠蛇", 205: "前六肖+马羊",
+        206: "后六肖+龙虎", 207: "前六肖+狗猴", 208: "前六肖+马鸡", 209: "后六肖+兔牛", 210: "后六肖+蛇鼠",
+        211: "前六肖+猴羊", 212: "后六肖+牛龙", 213: "后六肖+兔鼠", 214: "前六肖+猴猪", 215: "后六肖+龙蛇",
+        216: "后六肖+牛鼠", 217: "前六肖+狗羊", 218: "前六肖+猴猪", 219: "后六肖+蛇鼠", 220: "前六肖+羊鸡",
+        221: "后六肖+兔虎", 222: "前六肖+马猴", 223: "前六肖+猪羊", 224: "后六肖+虎鼠", 225: "后六肖+龙牛",
+        226: "前六肖+马狗", 227: "前六肖+羊猴", 228: "后六肖+蛇龙", 229: "前六肖+马狗", 230: "后六肖+鼠牛",
+        231: "前六肖+猴鸡", 232: "前六肖+狗马", 233: "后六肖+牛鼠", 234: "前六肖+羊猪", 235: "后六肖+龙虎",
+        236: "后六肖+兔牛", 237: "前六肖+鸡羊", 238: "后六肖+虎蛇", 239: "后六肖+鼠兔", 240: "前六肖+羊猴",
+        241: "后六肖+虎龙", 242: "后六肖+鼠兔", 243: "前六肖+猴狗", 244: "后六肖+牛虎", 245: "后六肖+蛇鼠",
+        246: "前六肖+猴马", 247: "后六肖+牛虎", 248: "前六肖+狗羊", 249: "后六肖+鼠蛇", 250: "后六肖+牛兔",
+        251: "前六肖+马羊", 252: "后六肖+虎龙", 253: "前六肖+狗猴", 254: "后六肖+兔鼠", 255: "后六肖+牛龙",
+        256: "前六肖+猪马", 257: "前六肖+狗羊", 258: "后六肖+兔蛇", 259: "后六肖+牛龙", 260: "前六肖+羊鸡",
+        261: "前六肖+马狗", 262: "后六肖+牛鼠", 263: "前六肖+猴猪", 264: "后六肖+龙虎", 265: "前六肖+羊鸡",
+        266: "后六肖+蛇鼠", 267: "前六肖+马猴", 268: "后六肖+龙虎", 269: "前六肖+鸡猪", 270: "前六肖+狗马",
+        271: "后六肖+龙鼠", 272: "后六肖+虎牛", 273: "前六肖+马猴", 274: "后六肖+龙蛇", 275: "前六肖+狗鸡",
+        276: "前六肖+马猪", 277: "后六肖+鼠兔", 278: "前六肖+鸡猴", 279: "前六肖+马狗", 280: "后六肖+兔蛇",
+        281: "后六肖+牛龙", 282: "前六肖+马猪", 283: "后六肖+兔鼠", 284: "后六肖+龙虎", 285: "前六肖+猴马",
+        286: "前六肖+羊鸡", 287: "后六肖+牛鼠", 288: "后六肖+蛇虎", 289: "前六肖+猪猴", 290: "前六肖+狗羊",
+        291: "后六肖+龙鼠", 292: "后六肖+牛虎", 293: "前六肖+鸡猪", 294: "后六肖+鼠兔", 295: "后六肖+蛇虎",
+        296: "前六肖+狗鸡", 297: "前六肖+猪羊", 298: "后六肖+鼠蛇", 299: "后六肖+龙虎", 300: "前六肖+马猴",
+        301: "前六肖+猪狗", 302: "后六肖+虎蛇", 303: "后六肖+鼠兔", 304: "前六肖+鸡羊", 305: "后六肖+蛇龙",
+        306: "后六肖+虎兔", 307: "前六肖+马猪", 308: "后六肖+鼠龙", 309: "前六肖+羊猴", 310: "前六肖+狗鸡",
+        311: "后六肖+兔牛", 312: "前六肖+马羊", 313: "后六肖+蛇鼠", 314: "后六肖+牛虎", 315: "前六肖+鸡马",
+        316: "后六肖+鼠龙", 317: "后六肖+兔虎", 318: "前六肖+狗羊", 319: "前六肖+马鸡", 320: "后六肖+兔蛇",
+        321: "前六肖+猪猴", 322: "前六肖+狗羊", 323: "后六肖+虎牛", 324: "前六肖+猪马", 325: "后六肖+蛇龙",
+        326: "后六肖+鼠虎", 327: "前六肖+猴马", 328: "后六肖+蛇龙", 329: "后六肖+牛兔", 330: "前六肖+鸡狗",
+        331: "前六肖+马羊", 332: "后六肖+龙牛", 333: "前六肖+猴狗", 334: "前六肖+猪马", 335: "后六肖+鼠蛇",
+        336: "后六肖+龙牛", 337: "前六肖+猪羊", 338: "前六肖+狗鸡", 339: "后六肖+虎鼠", 340: "后六肖+蛇龙",
+        341: "前六肖+猪羊", 342: "后六肖+牛兔", 343: "前六肖+猴马", 344: "后六肖+鼠蛇", 345: "前六肖+鸡猪",
+        346: "后六肖+牛兔", 347: "前六肖+狗猴", 348: "后六肖+龙虎", 349: "前六肖+鸡猪", 350: "前六肖+狗羊",
+        351: "后六肖+牛鼠", 352: "前六肖+鸡猪", 353: "后六肖+龙蛇", 354: "后六肖+兔牛", 355: "前六肖+鸡狗",
+        356: "前六肖+猴马", 357: "后六肖+虎鼠", 358: "前六肖+狗猪", 359: "前六肖+鸡羊", 360: "后六肖+龙鼠",
+        361: "前六肖+马猴", 362: "前六肖+羊鸡", 363: "后六肖+兔蛇", 364: "后六肖+龙虎", 365: "前六肖+羊猪",
+        366: "前六肖+狗马"
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error(" ");
+            });
+    }
+
+    function getPredictDanShuangForKy(kyNum) {
+        if (STATIC_PREDICTIONS[kyNum]) {
+            return STATIC_PREDICTIONS[kyNum];
+        }
+        let cycle = Math.floor((kyNum - 1) / 2);
+        return cycle % 2 === 0 ? "前六肖+羊鸡" : "后六肖+兔虎";
+    }
+
+    function getDanShuangByNum(numStr, animal) {
+        if (QIAN_LIU_XIAO.includes(animal)) return "前六肖";
+        if (HOU_LIU_XIAO.includes(animal)) return "后六肖";
+        return "";
+    }
+
+    function formatTwoDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    function formatThreeDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '001';
+        return String(num).padStart(3, '0');
+    }
+
+    function checkWin(predicted, animal) {
+        if (!animal) return false;
+        let parts = predicted.split('+');
+        let mainCat = parts[0];
+        let subZodiacs = parts[1] || '';
+        
+        let actualCat = getDanShuangByNum('', animal);
+        if (subZodiacs.includes(animal)) return true;
+        if (mainCat === actualCat) return true;
+        return false;
+    }
+
+    function renderPredictedHtml(predicted, animal, isWin) {
+        let parts = predicted.split('+');
+        let mainCat = parts[0];
+        let subZodiacs = parts[1] || '';
+        let actualCat = getDanShuangByNum('', animal);
+
+        let mainCatHtml = mainCat;
+        let subZodiacsHtml = subZodiacs;
+
+        if (isWin) {
+            let hitSubZodiac = subZodiacs && subZodiacs.includes(animal);
+
+            if (hitSubZodiac) {
+                let z1 = subZodiacs.charAt(0);
+                let z2 = subZodiacs.charAt(1);
+                let z1Html = (z1 === animal) ? `<span class="win-animal">${z1}</span>` : z1;
+                let z2Html = (z2 === animal) ? `<span class="win-animal">${z2}</span>` : z2;
+                subZodiacsHtml = z1Html + z2Html;
+            } else if (mainCat === actualCat) {
+                mainCatHtml = `<span class="win-animal">${mainCat}</span>`;
+            }
+        }
+
+        return `【<span style="color:#0000FF;">${mainCatHtml}+${subZodiacsHtml}</span>】`;
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined && String(r[7].v).trim() !== '') {
+                        numTeFormatted = formatTwoDigits(r[7].v);
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isNotDone = item.numTe === '' || item.numTe === '0' || item.numTe === '00';
+                if (!isNotDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predicted = getPredictDanShuangForKy(item.kyNum);
+                let animal = duLieuMap[item.numTe] || '';
+                let isValidNum = duLieuMap.hasOwnProperty(item.numTe);
+                let isWin = isValidNum && checkWin(predicted, animal);
+                evaluatedDoneList.push({ item, isWin });
+            }
+
+            let checkLatestMisses = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestMisses++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestMisses < 3) {
+                let consecutiveMisses = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveMisses++;
+                        if (consecutiveMisses >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveMisses = 0;
+                    }
+                }
+            } else {
+                cutoffIndex = evaluatedDoneList.length;
+            }
+
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictDanShuangForKy(nextKyNum);
+            let kyStrNext = formatThreeDigits(nextKyNum);
+
+            let htmlNextKy = `<p style="line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:bold;">${kyStrNext}期:<span style="color:#FF00FF;">前后六肖</span>【<span style="color:#0000FF;">${predictNext}</span>】开:<span style="color:#FF0000;">？00准</span></p>`;
+
+            let historyOutputs = [];
+            if (checkLatestMisses < 3) {
+                for (let i = cutoffIndex; i < evaluatedDoneList.length; i++) {
+                    let evalItem = evaluatedDoneList[i];
+                    let item = evalItem.item;
+                    let predicted = getPredictDanShuangForKy(item.kyNum);
+                    let shengXiaoWin = duLieuMap[item.numTe] || '';
+                    let animal = shengXiaoWin;
+
+                    if (evalItem.isWin) {
+                        let resStrWin = shengXiaoWin + item.numTe + '准';
+                        let kyStr = formatThreeDigits(item.kyNum);
+                        let formattedPredictHtml = renderPredictedHtml(predicted, animal, evalItem.isWin);
+                        historyOutputs.push(`<p style="line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:bold;">${kyStr}期:<span style="color:#FF00FF;">前后六肖</span>${formattedPredictHtml}开:<span style="color:#FF0000;">${resStrWin}</span></p>`);
+                    }
+                }
+            }
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = formatThreeDigits(nextKyNum + 1);
+                let kyStr2 = formatThreeDigits(nextKyNum + 2);
+                let defaultHtml1 = `<p style="line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:bold;">${kyStr1}期:<span style="color:#FF00FF;">前后六肖</span>【<span style="color:#0000FF;">發發發+發發</span>】开:<span style="color:#FF0000;">？00准</span></p>`;
+                let defaultHtml2 = `<p style="line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:bold;">${kyStr2}期:<span style="color:#FF00FF;">前后六肖</span>【<span style="color:#0000FF;">發發發+發發</span>】开:<span style="color:#FF0000;">？00准</span></p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = formatThreeDigits(nextKyNum + 1);
+                let defaultHtmlExtra = `<p style="line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:bold;">${kyStrExtra}期:<span style="color:#FF00FF;">前后六肖</span>【<span style="color:#0000FF;">發發發+發發</span>】开:<span style="color:#FF0000;">？00准</span></p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
