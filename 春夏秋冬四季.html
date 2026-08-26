@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>两季中特</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}&_=${Date.now()}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}&_=${Date.now()}`;
+
+    let duLieuMap = {};
+
+    // Phân loại con giáp theo 4 mùa
+    const SEASON_MAP = {
+        '虎': '春', '兔': '春', '龙': '春',
+        '蛇': '夏', '马': '夏', '羊': '夏',
+        '猴': '秋', '鸡': '秋', '狗': '秋',
+        '猪': '冬', '鼠': '冬', '牛': '冬'
+    };
+
+    // Bảng 366 kỳ dự đoán cố định (Mỗi kỳ chọn 2 mùa)
+    const STATIC_PREDICTIONS = {
+        1: ["夏", "秋"], 2: ["春", "夏"], 3: ["秋", "冬"], 4: ["春", "冬"], 5: ["夏", "冬"],
+        6: ["春", "秋"], 7: ["夏", "秋"], 8: ["春", "夏"], 9: ["秋", "冬"], 10: ["春", "冬"],
+        11: ["夏", "冬"], 12: ["春", "秋"], 13: ["夏", "秋"], 14: ["春", "夏"], 15: ["秋", "冬"],
+        16: ["春", "冬"], 17: ["夏", "冬"], 18: ["春", "秋"], 19: ["夏", "秋"], 20: ["春", "夏"],
+        21: ["秋", "冬"], 22: ["春", "冬"], 23: ["夏", "冬"], 24: ["春", "秋"], 25: ["夏", "秋"],
+        26: ["春", "夏"], 27: ["秋", "冬"], 28: ["春", "冬"], 29: ["夏", "冬"], 30: ["春", "秋"],
+        31: ["夏", "秋"], 32: ["春", "夏"], 33: ["秋", "冬"], 34: ["春", "冬"], 35: ["夏", "冬"],
+        36: ["春", "秋"], 37: ["夏", "秋"], 38: ["春", "夏"], 39: ["秋", "冬"], 40: ["春", "冬"],
+        41: ["夏", "冬"], 42: ["春", "秋"], 43: ["夏", "秋"], 44: ["春", "夏"], 45: ["秋", "冬"],
+        46: ["春", "冬"], 47: ["夏", "冬"], 48: ["春", "秋"], 49: ["夏", "秋"], 50: ["春", "夏"],
+        51: ["秋", "冬"], 52: ["春", "冬"], 53: ["夏", "冬"], 54: ["春", "秋"], 55: ["夏", "秋"],
+        56: ["春", "夏"], 57: ["秋", "冬"], 58: ["春", "冬"], 59: ["夏", "冬"], 60: ["春", "秋"],
+        61: ["夏", "秋"], 62: ["春", "夏"], 63: ["秋", "冬"], 64: ["春", "冬"], 65: ["夏", "冬"],
+        66: ["春", "秋"], 67: ["夏", "秋"], 68: ["春", "夏"], 69: ["秋", "冬"], 70: ["春", "冬"],
+        71: ["夏", "冬"], 72: ["春", "秋"], 73: ["夏", "秋"], 74: ["春", "夏"], 75: ["秋", "冬"],
+        76: ["春", "冬"], 77: ["夏", "冬"], 78: ["春", "秋"], 79: ["夏", "秋"], 80: ["春", "夏"],
+        81: ["秋", "冬"], 82: ["春", "冬"], 83: ["夏", "冬"], 84: ["春", "秋"], 85: ["夏", "秋"],
+        86: ["春", "夏"], 87: ["秋", "冬"], 88: ["春", "冬"], 89: ["夏", "冬"], 90: ["春", "秋"],
+        91: ["夏", "秋"], 92: ["春", "夏"], 93: ["秋", "冬"], 94: ["春", "冬"], 95: ["夏", "冬"],
+        96: ["春", "秋"], 97: ["夏", "秋"], 98: ["春", "夏"], 99: ["秋", "冬"], 100: ["春", "冬"],
+        101: ["夏", "冬"], 102: ["春", "秋"], 103: ["夏", "秋"], 104: ["春", "夏"], 105: ["秋", "冬"],
+        106: ["春", "冬"], 107: ["夏", "冬"], 108: ["春", "秋"], 109: ["夏", "秋"], 110: ["春", "夏"],
+        111: ["秋", "冬"], 112: ["春", "冬"], 113: ["夏", "冬"], 114: ["春", "秋"], 115: ["夏", "秋"],
+        116: ["春", "夏"], 117: ["秋", "冬"], 118: ["春", "冬"], 119: ["夏", "冬"], 120: ["春", "秋"],
+        121: ["夏", "秋"], 122: ["春", "夏"], 123: ["秋", "冬"], 124: ["春", "冬"], 125: ["夏", "冬"],
+        126: ["春", "秋"], 127: ["夏", "秋"], 128: ["春", "夏"], 129: ["秋", "冬"], 130: ["春", "冬"],
+        131: ["夏", "冬"], 132: ["春", "秋"], 133: ["夏", "秋"], 134: ["春", "夏"], 135: ["秋", "冬"],
+        136: ["春", "冬"], 137: ["夏", "冬"], 138: ["春", "秋"], 139: ["夏", "秋"], 140: ["春", "夏"],
+        141: ["秋", "冬"], 142: ["春", "冬"], 143: ["夏", "冬"], 144: ["春", "秋"], 145: ["夏", "秋"],
+        146: ["春", "夏"], 147: ["秋", "冬"], 148: ["春", "冬"], 149: ["夏", "冬"], 150: ["春", "秋"],
+        151: ["夏", "秋"], 152: ["春", "夏"], 153: ["秋", "冬"], 154: ["春", "冬"], 155: ["夏", "冬"],
+        156: ["春", "秋"], 157: ["夏", "秋"], 158: ["春", "夏"], 159: ["秋", "冬"], 160: ["春", "冬"],
+        161: ["夏", "冬"], 162: ["春", "秋"], 163: ["夏", "秋"], 164: ["春", "夏"], 165: ["秋", "冬"],
+        166: ["春", "冬"], 167: ["夏", "冬"], 168: ["春", "秋"], 169: ["夏", "秋"], 170: ["春", "夏"],
+        171: ["秋", "冬"], 172: ["春", "冬"], 173: ["夏", "冬"], 174: ["春", "秋"], 175: ["夏", "秋"],
+        176: ["春", "夏"], 177: ["秋", "冬"], 178: ["春", "冬"], 179: ["夏", "冬"], 180: ["春", "秋"],
+        181: ["夏", "秋"], 182: ["春", "夏"], 183: ["秋", "冬"], 184: ["春", "冬"], 185: ["夏", "冬"],
+        186: ["春", "秋"], 187: ["夏", "秋"], 188: ["春", "夏"], 189: ["秋", "冬"], 190: ["春", "冬"],
+        191: ["夏", "冬"], 192: ["春", "秋"], 193: ["夏", "秋"], 194: ["春", "夏"], 195: ["秋", "冬"],
+        196: ["春", "冬"], 197: ["夏", "冬"], 198: ["春", "秋"], 199: ["夏", "秋"], 200: ["春", "夏"],
+        201: ["秋", "冬"], 202: ["春", "冬"], 203: ["夏", "冬"], 204: ["春", "秋"], 205: ["夏", "秋"],
+        206: ["春", "夏"], 207: ["秋", "冬"], 208: ["春", "冬"], 209: ["夏", "冬"], 210: ["春", "秋"],
+        211: ["夏", "秋"], 212: ["春", "夏"], 213: ["秋", "冬"], 214: ["春", "冬"], 215: ["夏", "冬"],
+        216: ["春", "秋"], 217: ["夏", "秋"], 218: ["春", "夏"], 219: ["秋", "冬"], 220: ["春", "冬"],
+        221: ["夏", "冬"], 222: ["春", "秋"], 223: ["夏", "秋"], 224: ["春", "夏"], 225: ["秋", "冬"],
+        226: ["春", "冬"], 227: ["夏", "冬"], 228: ["春", "秋"], 229: ["夏", "秋"], 230: ["春", "夏"],
+        231: ["秋", "冬"], 232: ["春", "冬"], 233: ["夏", "冬"], 234: ["春", "秋"], 235: ["夏", "秋"],
+        236: ["春", "夏"], 237: ["秋", "冬"], 238: ["春", "冬"], 239: ["夏", "冬"], 240: ["春", "秋"],
+        241: ["夏", "秋"], 242: ["春", "夏"], 243: ["秋", "冬"], 244: ["春", "冬"], 245: ["夏", "冬"],
+        246: ["春", "秋"], 247: ["夏", "秋"], 248: ["春", "夏"], 249: ["秋", "冬"], 250: ["春", "冬"],
+        251: ["夏", "冬"], 252: ["春", "秋"], 253: ["夏", "秋"], 254: ["春", "夏"], 255: ["秋", "冬"],
+        256: ["春", "冬"], 257: ["夏", "冬"], 258: ["春", "秋"], 259: ["夏", "秋"], 260: ["春", "夏"],
+        261: ["秋", "冬"], 262: ["春", "冬"], 263: ["夏", "冬"], 264: ["春", "秋"], 265: ["夏", "秋"],
+        266: ["春", "夏"], 267: ["秋", "冬"], 268: ["春", "冬"], 269: ["夏", "冬"], 270: ["春", "秋"],
+        271: ["夏", "秋"], 272: ["春", "夏"], 273: ["秋", "冬"], 274: ["春", "冬"], 275: ["夏", "冬"],
+        276: ["春", "秋"], 277: ["夏", "秋"], 278: ["春", "夏"], 279: ["秋", "冬"], 280: ["春", "冬"],
+        281: ["夏", "冬"], 282: ["春", "秋"], 283: ["夏", "秋"], 284: ["春", "夏"], 285: ["秋", "冬"],
+        286: ["春", "冬"], 287: ["夏", "冬"], 288: ["春", "秋"], 289: ["夏", "秋"], 290: ["春", "夏"],
+        291: ["秋", "冬"], 292: ["春", "冬"], 293: ["夏", "冬"], 294: ["春", "秋"], 295: ["夏", "秋"],
+        296: ["春", "夏"], 297: ["秋", "冬"], 298: ["春", "冬"], 299: ["夏", "冬"], 300: ["春", "秋"],
+        301: ["夏", "秋"], 302: ["春", "夏"], 303: ["秋", "冬"], 304: ["春", "冬"], 305: ["夏", "冬"],
+        306: ["春", "秋"], 307: ["夏", "秋"], 308: ["春", "夏"], 309: ["秋", "冬"], 310: ["春", "冬"],
+        311: ["夏", "冬"], 312: ["春", "秋"], 313: ["夏", "秋"], 314: ["春", "夏"], 315: ["秋", "冬"],
+        316: ["春", "冬"], 317: ["夏", "冬"], 318: ["春", "秋"], 319: ["夏", "秋"], 320: ["春", "夏"],
+        321: ["秋", "冬"], 322: ["春", "冬"], 323: ["夏", "冬"], 324: ["春", "秋"], 325: ["夏", "秋"],
+        326: ["春", "夏"], 327: ["秋", "冬"], 328: ["春", "冬"], 329: ["夏", "冬"], 330: ["春", "秋"],
+        331: ["夏", "秋"], 332: ["春", "夏"], 333: ["秋", "冬"], 334: ["春", "冬"], 335: ["夏", "冬"],
+        336: ["春", "秋"], 337: ["夏", "秋"], 338: ["春", "夏"], 339: ["秋", "冬"], 340: ["春", "冬"],
+        341: ["夏", "冬"], 342: ["春", "秋"], 343: ["夏", "秋"], 344: ["春", "夏"], 345: ["秋", "冬"],
+        346: ["春", "冬"], 347: ["夏", "冬"], 348: ["春", "秋"], 349: ["夏", "秋"], 350: ["春", "夏"],
+        351: ["秋", "冬"], 352: ["春", "冬"], 353: ["夏", "冬"], 354: ["春", "秋"], 355: ["夏", "秋"],
+        356: ["春", "夏"], 357: ["秋", "冬"], 358: ["春", "冬"], 359: ["夏", "冬"], 360: ["春", "秋"],
+        361: ["夏", "秋"], 362: ["春", "夏"], 363: ["秋", "冬"], 364: ["春", "冬"], 365: ["夏", "冬"],
+        366: ["春", "秋"]
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error(" ");
+            });
+    }
+
+    function getPredictSeasonsForKy(kyNum) {
+        let actualKy = ((kyNum - 1) % 366) + 1;
+        if (STATIC_PREDICTIONS[actualKy]) {
+            return STATIC_PREDICTIONS[actualKy];
+        }
+        return ["夏", "秋"];
+    }
+
+    function formatTwoDigits(val) {
+        let cleanVal = String(val).trim();
+        let num = parseInt(cleanVal.replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    function formatThreeDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '001';
+        return String(num).padStart(3, '0');
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined) {
+                        let valStr = String(r[7].v).trim();
+                        if (valStr !== '' && valStr !== '0' && valStr !== '00') {
+                            numTeFormatted = formatTwoDigits(valStr);
+                        }
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isDone = item.numTe !== '' && item.numTe !== '00';
+                if (isDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predictedSeasons = getPredictSeasonsForKy(item.kyNum);
+                let actualAnimal = duLieuMap[item.numTe] || '';
+                let actualSeason = SEASON_MAP[actualAnimal] || '';
+                let isWin = actualSeason !== '' && predictedSeasons.includes(actualSeason);
+                evaluatedDoneList.push({ item, predictedSeasons, actualAnimal, actualSeason, isWin });
+            }
+
+            let checkLatestMisses = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestMisses++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestMisses < 3) {
+                let consecutiveMisses = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveMisses++;
+                        if (consecutiveMisses >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveMisses = 0;
+                    }
+                }
+            } else {
+                cutoffIndex = evaluatedDoneList.length;
+            }
+
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictSeasonsForKy(nextKyNum);
+            let kyStrNext = formatThreeDigits(nextKyNum);
+
+            let htmlNextKy = `<p style="font-family:SimSun,宋体,宋,serif;font-size:15pt;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"> ${kyStrNext}期:<span style="color:#FF6600;">两季中特</span><span style="color:#0000FF;">【${predictNext[0]}+${predictNext[1]}】</span>开:<span style="color:#FF0000;">？00</span>对</p>`;
+
+            let historyOutputs = [];
+
+            if (checkLatestMisses < 3) {
+                for (let i = cutoffIndex; i < evaluatedDoneList.length; i++) {
+                    let entry = evaluatedDoneList[i];
+                    if (entry.isWin) {
+                        let resStrWin = entry.actualAnimal + entry.item.numTe;
+                        let kyStr = formatThreeDigits(entry.item.kyNum);
+                        
+                        let formattedSeasonsHtml = entry.predictedSeasons.map(season => {
+                            if (season === entry.actualSeason) {
+                                return `<span style="color:#FF0000;background-color:#FFFF00;">${season}</span>`;
+                            }
+                            return season;
+                        }).join('+');
+                        
+                        historyOutputs.push(`<p style="font-family:SimSun,宋体,宋,serif;font-size:15pt;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"> ${kyStr}期:<span style="color:#FF6600;">两季中特</span><span style="color:#0000FF;">【${formattedSeasonsHtml}】</span>开:<span style="color:#FF0000;">${resStrWin}</span>准</p>`);
+                    }
+                }
+            }
+
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = formatThreeDigits(nextKyNum + 1);
+                let kyStr2 = formatThreeDigits(nextKyNum + 2);
+                let defaultHtml1 = `<p style="font-family:SimSun,宋体,宋,serif;font-size:15pt;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"> ${kyStr1}期:<span style="color:#FF6600;">两季中特</span><span style="color:#0000FF;">【夏+秋】</span>开:<span style="color:#FF0000;">？00</span>对</p>`;
+                let defaultHtml2 = `<p style="font-family:SimSun,宋体,宋,serif;font-size:15pt;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"> ${kyStr2}期:<span style="color:#FF6600;">两季中特</span><span style="color:#0000FF;">【夏+秋】</span>开:<span style="color:#FF0000;">？00</span>对</p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = formatThreeDigits(nextKyNum + 1);
+                let defaultHtmlExtra = `<p style="font-family:SimSun,宋体,宋,serif;font-size:15pt;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"> ${kyStrExtra}期:<span style="color:#FF6600;">两季中特</span><span style="color:#0000FF;">【夏+秋】</span>开:<span style="color:#FF0000;">？00</span>对</p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
