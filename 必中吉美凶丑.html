@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门六合彩【吉美凶丑中特】稳定资料！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .win-animal {
+            color: #FF0000;
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}&_=${Date.now()}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}&_=${Date.now()}`;
+
+    let duLieuMap = {};
+
+    const JI_MEI = ["兔", "龙", "蛇", "马", "羊", "鸡"];
+    const XIONG_CHOU = ["鼠", "牛", "虎", "猴", "狗", "猪"];
+
+    const STATIC_PREDICTIONS = {
+        1: "凶丑+蛇鸡", 2: "凶丑+龙马", 3: "吉美+猴狗", 4: "吉美+虎牛", 5: "凶丑+龙鸡",
+        6: "凶丑+兔马", 7: "吉美+猪牛", 8: "吉美+猴鼠", 9: "凶丑+兔蛇", 10: "吉美+牛猪",
+        11: "吉美+猴鼠", 12: "凶丑+羊马", 13: "凶丑+鸡龙", 14: "吉美+鼠虎", 15: "吉美+牛猴",
+        16: "凶丑+马鸡", 17: "吉美+狗虎", 18: "吉美+猴猪", 19: "凶丑+兔羊", 20: "凶丑+蛇马",
+        21: "吉美+虎鼠", 22: "吉美+猴猪", 23: "凶丑+蛇鸡", 24: "凶丑+马龙", 25: "吉美+狗鼠",
+        26: "吉美+虎猪", 27: "凶丑+蛇龙", 28: "凶丑+羊马", 29: "吉美+猪狗", 30: "凶丑+龙蛇",
+        31: "吉美+牛猴", 32: "吉美+虎狗", 33: "凶丑+马蛇", 34: "吉美+鼠牛", 35: "吉美+狗猴",
+        36: "凶丑+鸡蛇", 37: "凶丑+龙马", 38: "吉美+鼠牛", 39: "吉美+猪猴", 40: "凶丑+龙马",
+        41: "吉美+牛鼠", 42: "吉美+猪虎", 43: "凶丑+蛇鸡", 44: "凶丑+兔马", 45: "吉美+鼠猪",
+        46: "凶丑+羊鸡", 47: "凶丑+马龙", 48: "吉美+狗猴", 49: "吉美+牛鼠", 50: "凶丑+马蛇",
+        51: "吉美+虎猴", 52: "吉美+牛狗", 53: "凶丑+鸡蛇", 54: "凶丑+兔马", 55: "吉美+牛虎",
+        56: "凶丑+蛇羊", 57: "凶丑+鸡马", 58: "吉美+牛鼠", 59: "凶丑+兔羊", 60: "凶丑+蛇马",
+        61: "吉美+虎猴", 62: "吉美+猪牛", 63: "凶丑+鸡马", 64: "吉美+虎猴", 65: "凶丑+蛇羊",
+        66: "凶丑+鸡兔", 67: "吉美+鼠猴", 68: "凶丑+羊蛇", 69: "吉美+狗虎", 70: "吉美+猪鼠",
+        71: "凶丑+马兔", 72: "凶丑+蛇羊", 73: "吉美+猴狗", 74: "凶丑+龙马", 75: "凶丑+羊鸡",
+        76: "吉美+虎牛", 77: "吉美+猴狗", 78: "凶丑+龙蛇", 79: "凶丑+羊兔", 80: "吉美+鼠猴",
+        81: "吉美+牛猪", 82: "凶丑+蛇兔", 83: "凶丑+鸡羊", 84: "吉美+虎牛", 85: "吉美+鼠猴",
+        86: "凶丑+鸡兔", 87: "凶丑+马蛇", 88: "吉美+虎猪", 89: "吉美+狗鼠", 90: "凶丑+兔鸡",
+        91: "凶丑+蛇马", 92: "吉美+猪牛", 93: "吉美+鼠狗", 94: "凶丑+兔龙", 95: "凶丑+马羊",
+        96: "吉美+牛鼠", 97: "吉美+猪狗", 98: "凶丑+马兔", 99: "吉美+虎鼠", 100: "凶丑+龙鸡",
+        101: "凶丑+蛇马", 102: "吉美+虎鼠", 103: "凶丑+龙鸡", 104: "吉美+牛猪", 105: "吉美+虎猴",
+        106: "凶丑+马蛇", 107: "吉美+狗鼠", 108: "吉美+虎猪", 109: "凶丑+龙鸡", 110: "吉美+鼠狗",
+        111: "吉美+猪猴", 112: "凶丑+鸡马", 113: "吉美+虎狗", 114: "吉美+鼠猴", 115: "凶丑+龙羊",
+        116: "吉美+虎狗", 117: "吉美+鼠猪", 118: "凶丑+蛇鸡", 119: "凶丑+马龙", 120: "吉美+牛鼠",
+        121: "凶丑+鸡羊", 122: "吉美+猴狗", 123: "凶丑+龙兔", 124: "凶丑+羊鸡", 125: "吉美+牛鼠",
+        126: "吉美+虎狗", 127: "凶丑+羊鸡", 128: "凶丑+蛇马", 129: "吉美+猴猪", 130: "凶丑+龙兔",
+        131: "凶丑+鸡马", 132: "吉美+猪鼠", 133: "凶丑+蛇龙", 134: "凶丑+鸡马", 135: "吉美+猪猴",
+        136: "凶丑+龙蛇", 137: "吉美+牛虎", 138: "凶丑+兔马", 139: "凶丑+龙鸡", 140: "吉美+猪虎",
+        141: "凶丑+羊马", 142: "凶丑+龙兔", 143: "吉美+虎鼠", 144: "凶丑+羊马", 145: "吉美+猪猴",
+        146: "凶丑+鸡蛇", 147: "凶丑+兔马", 148: "吉美+牛猴", 149: "吉美+鼠虎", 150: "凶丑+龙马",
+        151: "吉美+猴狗", 152: "吉美+鼠牛", 153: "凶丑+羊鸡", 154: "凶丑+兔蛇", 155: "吉美+鼠虎",
+        156: "吉美+牛狗", 157: "凶丑+马龙", 158: "吉美+虎鼠", 159: "吉美+牛猪", 160: "凶丑+蛇马",
+        161: "凶丑+羊鸡", 162: "吉美+鼠牛", 163: "凶丑+蛇马", 164: "凶丑+羊兔", 165: "吉美+鼠狗",
+        166: "吉美+牛虎", 167: "凶丑+蛇兔", 168: "凶丑+鸡马", 169: "吉美+猴猪", 170: "凶丑+龙兔",
+        171: "吉美+虎鼠", 172: "凶丑+鸡马", 173: "吉美+牛狗", 174: "吉美+猴猪", 175: "凶丑+兔龙",
+        176: "凶丑+蛇鸡", 177: "吉美+鼠猴", 178: "吉美+狗虎", 179: "凶丑+兔鸡", 180: "凶丑+蛇龙",
+        181: "吉美+牛狗", 182: "吉美+猪猴", 183: "凶丑+龙蛇", 184: "吉美+狗虎", 185: "凶丑+羊鸡",
+        186: "凶丑+龙蛇", 187: "吉美+牛猴", 188: "凶丑+马鸡", 189: "吉美+猪狗", 190: "吉美+虎猴",
+        191: "凶丑+蛇龙", 192: "凶丑+羊鸡", 193: "吉美+牛鼠", 194: "凶丑+龙兔", 195: "凶丑+马羊",
+        196: "吉美+猴虎", 197: "凶丑+龙鸡", 198: "凶丑+兔马", 199: "吉美+狗虎", 200: "凶丑+龙鸡",
+        201: "吉美+狗猴", 202: "吉美+鼠猪", 203: "凶丑+龙兔", 204: "凶丑+马羊", 205: "吉美+牛鼠",
+        206: "吉美+猪虎", 207: "凶丑+马羊", 208: "吉美+牛猴", 209: "吉美+虎猪", 210: "凶丑+龙鸡",
+        211: "吉美+牛猴", 212: "凶丑+羊兔", 213: "吉美+狗虎", 214: "吉美+鼠猪", 215: "凶丑+羊马",
+        216: "吉美+牛猴", 217: "凶丑+兔龙", 218: "吉美+虎鼠", 219: "凶丑+鸡羊", 220: "吉美+猴牛",
+        221: "凶丑+马龙", 222: "吉美+猪虎", 223: "凶丑+蛇鸡", 224: "凶丑+龙羊", 225: "吉美+虎鼠",
+        226: "凶丑+兔马", 227: "凶丑+龙羊", 228: "吉美+虎牛", 229: "吉美+狗鼠", 230: "凶丑+鸡兔",
+        231: "凶丑+羊蛇", 232: "吉美+猪虎", 233: "凶丑+兔鸡", 234: "吉美+鼠猴", 235: "吉美+猪虎",
+        236: "凶丑+马龙", 237: "吉美+狗鼠", 238: "吉美+猴牛", 239: "凶丑+龙蛇", 240: "凶丑+兔马",
+        241: "吉美+虎牛", 242: "吉美+猴狗", 243: "凶丑+马鸡", 244: "凶丑+蛇龙", 245: "吉美+猴鼠",
+        246: "凶丑+兔鸡", 247: "吉美+狗猪", 248: "凶丑+龙羊", 249: "吉美+牛鼠", 250: "吉美+猪虎",
+        251: "凶丑+马鸡", 252: "吉美+猴牛", 253: "凶丑+龙蛇", 254: "吉美+鼠猪", 255: "凶丑+马羊",
+        256: "吉美+牛狗", 257: "凶丑+鸡龙", 258: "凶丑+兔羊", 259: "吉美+虎狗", 260: "凶丑+马龙",
+        261: "凶丑+鸡兔", 262: "吉美+牛鼠", 263: "吉美+狗猴", 264: "凶丑+羊龙", 265: "吉美+鼠虎",
+        266: "吉美+猪猴", 267: "凶丑+兔羊", 268: "吉美+牛虎", 269: "吉美+猪鼠", 270: "凶丑+鸡龙",
+        271: "凶丑+羊兔", 272: "吉美+猴虎", 273: "吉美+狗猪", 274: "凶丑+龙兔", 275: "吉美+虎猴",
+        276: "吉美+牛鼠", 277: "凶丑+兔马", 278: "吉美+猴猪", 279: "吉美+虎鼠", 280: "凶丑+龙蛇",
+        281: "吉美+牛猪", 282: "凶丑+兔羊", 283: "凶丑+龙蛇", 284: "吉美+虎猴", 285: "吉美+鼠狗",
+        286: "凶丑+兔龙", 287: "吉美+牛猪", 288: "凶丑+鸡羊", 289: "吉美+狗鼠", 290: "吉美+虎牛",
+        291: "凶丑+羊龙", 292: "凶丑+鸡马", 293: "吉美+猴狗", 294: "凶丑+兔羊", 295: "吉美+虎牛",
+        296: "吉美+猴猪", 297: "凶丑+马兔", 298: "凶丑+鸡龙", 299: "吉美+猴猪", 300: "凶丑+兔蛇",
+        301: "凶丑+羊鸡", 302: "吉美+猪狗", 303: "凶丑+兔蛇", 304: "吉美+牛虎", 305: "凶丑+鸡马",
+        306: "凶丑+蛇兔", 307: "吉美+猴鼠", 308: "凶丑+龙鸡", 309: "凶丑+羊蛇", 310: "吉美+猴鼠",
+        311: "凶丑+兔马", 312: "吉美+虎狗", 313: "吉美+牛猪", 314: "凶丑+马兔", 315: "凶丑+鸡龙",
+        316: "吉美+狗牛", 317: "凶丑+羊马", 318: "吉美+虎猴", 319: "吉美+猪狗", 320: "凶丑+龙鸡",
+        321: "吉美+鼠牛", 322: "凶丑+马兔", 323: "凶丑+蛇羊", 324: "吉美+牛猴", 325: "吉美+虎鼠",
+        326: "凶丑+马龙", 327: "吉美+牛猴", 328: "吉美+虎狗", 329: "凶丑+鸡兔", 330: "吉美+猴牛",
+        331: "吉美+虎鼠", 332: "凶丑+鸡兔", 333: "吉美+猴猪", 334: "凶丑+龙蛇", 335: "凶丑+鸡兔",
+        336: "吉美+狗猪", 337: "凶丑+羊马", 338: "吉美+猴鼠", 339: "吉美+牛狗", 340: "凶丑+羊兔",
+        341: "吉美+虎猴", 342: "吉美+鼠牛", 343: "凶丑+兔龙", 344: "吉美+狗猴", 345: "凶丑+羊马",
+        346: "吉美+牛虎", 347: "吉美+猴狗", 348: "凶丑+鸡蛇", 349: "凶丑+兔羊", 350: "吉美+猴狗",
+        351: "吉美+猪牛", 352: "凶丑+蛇羊", 353: "吉美+虎猴", 354: "吉美+狗牛", 355: "凶丑+马蛇",
+        356: "凶丑+羊鸡", 357: "吉美+虎猴", 358: "吉美+狗鼠", 359: "凶丑+鸡羊", 360: "凶丑+蛇马",
+        361: "吉美+牛狗", 362: "凶丑+羊鸡", 363: "凶丑+兔龙", 364: "吉美+虎狗", 365: "凶丑+马蛇",
+        366: "吉美+猴猪"
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error(" ");
+            });
+    }
+
+    function getPredictDanShuangForKy(kyNum) {
+        if (STATIC_PREDICTIONS[kyNum]) {
+            return STATIC_PREDICTIONS[kyNum];
+        }
+        let cycle = Math.floor((kyNum - 1) / 2);
+        return cycle % 2 === 0 ? "吉美+牛虎" : "凶丑+兔蛇";
+    }
+
+    function getDanShuangByNum(numStr, animal) {
+        if (JI_MEI.includes(animal)) return "吉美";
+        if (XIONG_CHOU.includes(animal)) return "凶丑";
+        return "";
+    }
+
+    function formatTwoDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    function formatThreeDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '001';
+        return String(num).padStart(3, '0');
+    }
+
+    function checkWin(predicted, animal) {
+        if (!animal) return false;
+        let parts = predicted.split('+');
+        let mainCat = parts[0];
+        let subZodiacs = parts[1] || '';
+        
+        let actualCat = getDanShuangByNum('', animal);
+        if (subZodiacs.includes(animal)) return true;
+        if (mainCat === actualCat) return true;
+        return false;
+    }
+
+    function renderPredictedHtml(predicted, animal, isWin) {
+        let parts = predicted.split('+');
+        let mainCat = parts[0];
+        let subZodiacs = parts[1] || '';
+        let actualCat = getDanShuangByNum('', animal);
+
+        let mainCatHtml = mainCat;
+        let subZodiacsHtml = subZodiacs;
+
+        if (isWin) {
+            let hitSubZodiac = subZodiacs && subZodiacs.includes(animal);
+
+            if (hitSubZodiac) {
+                let z1 = subZodiacs.charAt(0);
+                let z2 = subZodiacs.charAt(1);
+                let z1Html = (z1 === animal) ? `<span class="win-animal">${z1}</span>` : z1;
+                let z2Html = (z2 === animal) ? `<span class="win-animal">${z2}</span>` : z2;
+                subZodiacsHtml = z1Html + z2Html;
+            } else if (mainCat === actualCat) {
+                mainCatHtml = `<span class="win-animal">${mainCat}</span>`;
+            }
+        }
+
+        return `【${mainCatHtml}+${subZodiacsHtml}】`;
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined && String(r[7].v).trim() !== '') {
+                        numTeFormatted = formatTwoDigits(r[7].v);
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isNotDone = item.numTe === '' || item.numTe === '0' || item.numTe === '00';
+                if (!isNotDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predicted = getPredictDanShuangForKy(item.kyNum);
+                let animal = duLieuMap[item.numTe] || '';
+                let isValidNum = duLieuMap.hasOwnProperty(item.numTe);
+                let isWin = isValidNum && checkWin(predicted, animal);
+                evaluatedDoneList.push({ item, isWin });
+            }
+
+            let checkLatestMisses = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestMisses++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestMisses < 3) {
+                let consecutiveMisses = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveMisses++;
+                        if (consecutiveMisses >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveMisses = 0;
+                    }
+                }
+            } else {
+                cutoffIndex = evaluatedDoneList.length;
+            }
+
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictDanShuangForKy(nextKyNum);
+            let kyStrNext = formatThreeDigits(nextKyNum);
+
+            let htmlNextKy = `<p style="font-size:12px;font-weight:400;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStrNext}期吉美凶丑【${predictNext}】开:？00中</p>`;
+
+            let historyOutputs = [];
+            if (checkLatestMisses < 3) {
+                for (let i = cutoffIndex; i < evaluatedDoneList.length; i++) {
+                    let evalItem = evaluatedDoneList[i];
+                    let item = evalItem.item;
+                    let predicted = getPredictDanShuangForKy(item.kyNum);
+                    let shengXiaoWin = duLieuMap[item.numTe] || '';
+                    let animal = shengXiaoWin;
+
+                    if (evalItem.isWin) {
+                        let resStrWin = shengXiaoWin + item.numTe + '中';
+                        let kyStr = formatThreeDigits(item.kyNum);
+                        let formattedPredictHtml = renderPredictedHtml(predicted, animal, evalItem.isWin);
+                        historyOutputs.push(`<p style="font-size:12px;font-weight:400;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStr}期吉美凶丑${formattedPredictHtml}开:${resStrWin}</p>`);
+                    }
+                }
+            }
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = formatThreeDigits(nextKyNum + 1);
+                let kyStr2 = formatThreeDigits(nextKyNum + 2);
+                let defaultHtml1 = `<p style="font-size:12px;font-weight:400;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStr1}期吉美凶丑【發發+發發】开:？00中</p>`;
+                let defaultHtml2 = `<p style="font-size:12px;font-weight:400;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStr2}期吉美凶丑【發發+發發】开:？00中</p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = formatThreeDigits(nextKyNum + 1);
+                let defaultHtmlExtra = `<p style="font-size:12px;font-weight:400;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStrExtra}期吉美凶丑【發發+發發】开:？00中</p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
