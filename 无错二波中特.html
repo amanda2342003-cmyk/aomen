@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门六合宝典-特码波路-长期免费</title>
+    <style>
+        .win-animal {
+            color: #FF0000;
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}&_=${Date.now()}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}&_=${Date.now()}`;
+
+    let duLieuMap = {};
+
+    const WAVE_GROUPS = {
+        "红波": [1, 2, 7, 8, 12, 13, 18, 19, 23, 24, 29, 30, 34, 35, 40, 45, 46],
+        "蓝波": [3, 4, 9, 10, 14, 15, 20, 25, 26, 31, 36, 37, 41, 42, 47, 48],
+        "绿波": [5, 6, 11, 16, 17, 21, 22, 27, 28, 32, 33, 38, 39, 43, 44, 49]
+    };
+
+    const STATIC_PREDICTIONS = {
+        1: "蓝波红波", 2: "红波绿波", 3: "绿波蓝波", 4: "蓝波红波", 5: "红波绿波", 6: "蓝波绿波", 7: "红波蓝波", 8: "蓝波绿波", 9: "红波蓝波", 10: "绿波红波",
+        11: "红波蓝波", 12: "绿波红波", 13: "绿波蓝波", 14: "蓝波红波", 15: "红波绿波", 16: "蓝波红波", 17: "红波蓝波", 18: "绿波蓝波", 19: "绿波红波", 20: "绿波蓝波",
+        21: "蓝波绿波", 22: "绿波红波", 23: "蓝波绿波", 24: "绿波红波", 25: "蓝波红波", 26: "红波绿波", 27: "绿波红波", 28: "蓝波红波", 29: "绿波蓝波", 30: "蓝波红波",
+        31: "绿波红波", 32: "蓝波绿波", 33: "绿波红波", 34: "绿波红波", 35: "红波绿波", 36: "绿波红波", 37: "蓝波红波", 38: "绿波红波", 39: "红波蓝波", 40: "绿波红波",
+        41: "绿波蓝波", 42: "蓝波红波", 43: "绿波红波", 44: "红波绿波", 45: "绿波蓝波", 46: "蓝波红波", 47: "红波绿波", 48: "绿波红波", 49: "蓝波绿波", 50: "红波蓝波",
+        51: "绿波红波", 52: "蓝波红波", 53: "绿波红波", 54: "蓝波红波", 55: "红波蓝波", 56: "绿波红波", 57: "红波绿波", 58: "绿波红波", 59: "蓝波绿波", 60: "红波绿波",
+        61: "绿波蓝波", 62: "绿波蓝波", 63: "红波蓝波", 64: "蓝波红波", 65: "绿波蓝波", 66: "蓝波绿波", 67: "绿波红波", 68: "红波蓝波", 69: "蓝波红波", 70: "红波蓝波",
+        71: "绿波红波", 72: "绿波蓝波", 73: "蓝波红波", 74: "红波绿波", 75: "绿波蓝波", 76: "红波蓝波", 77: "绿波红波", 78: "红波蓝波", 79: "蓝波红波", 80: "绿波红波",
+        81: "绿波蓝波", 82: "绿波红波", 83: "蓝波红波", 84: "绿波红波", 85: "绿波蓝波", 86: "蓝波红波", 87: "红波蓝波", 88: "蓝波红波", 89: "红波蓝波", 90: "绿波红波",
+        91: "蓝波红波", 92: "红波蓝波", 93: "绿波红波", 94: "绿波红波", 95: "蓝波绿波", 96: "红波绿波", 97: "绿波红波", 98: "红波绿波", 99: "绿波红波", 100: "绿波蓝波",
+        101: "蓝波红波", 102: "绿波蓝波", 103: "蓝波红波", 104: "红波绿波", 105: "绿波红波", 106: "红波蓝波", 107: "绿波红波", 108: "红波蓝波", 109: "绿波红波", 110: "红波蓝波",
+        111: "蓝波绿波", 112: "红波蓝波", 113: "绿波蓝波", 114: "绿波红波", 115: "绿波红波", 116: "绿波蓝波", 117: "红波蓝波", 118: "绿波蓝波", 119: "绿波红波", 120: "红波蓝波",
+        121: "绿波红波", 122: "绿波蓝波", 123: "红波绿波", 124: "绿波蓝波", 125: "绿波红波", 126: "蓝波绿波", 127: "绿波蓝波", 128: "红波绿波", 129: "绿波红波", 130: "绿波红波",
+        131: "蓝波红波", 132: "红波蓝波", 133: "绿波红波", 134: "蓝波红波", 135: "绿波红波", 136: "蓝波绿波", 137: "绿波红波", 138: "红波绿波", 139: "绿波红波", 140: "绿波蓝波",
+        141: "红波绿波", 142: "绿波红波", 143: "绿波红波", 144: "蓝波红波", 145: "红波绿波", 146: "绿波蓝波", 147: "蓝波红波", 148: "红波蓝波", 149: "蓝波红波", 150: "绿波蓝波",
+        151: "绿波红波", 152: "绿波蓝波", 153: "绿波红波", 154: "绿波红波", 155: "蓝波绿波", 156: "绿波红波", 157: "蓝波绿波", 158: "绿波红波", 159: "红波蓝波", 160: "蓝波绿波",
+        161: "红波蓝波", 162: "蓝波红波", 163: "绿波红波", 164: "红波蓝波", 165: "绿波红波", 166: "红波绿波", 167: "绿波蓝波", 168: "蓝波红波", 169: "红波蓝波", 170: "绿波红波",
+        171: "红波蓝波", 172: "绿波蓝波", 173: "红波蓝波", 174: "绿波红波", 175: "蓝波红波", 176: "绿波蓝波", 177: "红波蓝波", 178: "绿波红波", 179: "红波蓝波", 180: "蓝波红波",
+        181: "绿波蓝波", 182: "蓝波红波", 183: "绿波蓝波", 184: "蓝波红波", 185: "绿波蓝波", 186: "绿波红波", 187: "绿波蓝波", 188: "红波蓝波", 189: "绿波蓝波", 190: "绿波红波",
+        191: "红波蓝波", 192: "绿波红波", 193: "绿波蓝波", 194: "蓝波红波", 195: "绿波蓝波", 196: "红波绿波", 197: "蓝波绿波", 198: "绿波蓝波", 199: "红波蓝波", 200: "绿波红波",
+        201: "蓝波绿波", 202: "红波绿波", 203: "绿波红波", 204: "红波蓝波", 205: "绿波红波", 206: "绿波蓝波", 207: "蓝波红波", 208: "红波绿波", 209: "绿波蓝波", 210: "绿波蓝波",
+        211: "红波绿波", 212: "绿波红波", 213: "蓝波红波", 214: "绿波红波", 215: "蓝波绿波", 216: "绿波蓝波", 217: "红波绿波", 218: "绿波红波", 219: "绿波红波", 220: "红波蓝波",
+        221: "绿波红波", 222: "绿波红波", 223: "绿波红波", 224: "红波蓝波", 225: "绿波红波", 226: "蓝波绿波", 227: "红波蓝波", 228: "蓝波红波", 229: "红波绿波", 230: "绿波红波",
+        231: "绿波蓝波", 232: "红波蓝波", 233: "蓝波红波", 234: "绿波红波", 235: "绿波蓝波", 236: "绿波红波", 237: "蓝波红波", 238: "绿波蓝波", 239: "绿波红波", 240: "红波蓝波",
+        241: "绿波红波", 242: "红波绿波", 243: "蓝波绿波", 244: "绿波红波", 245: "蓝波红波", 246: "红波绿波", 247: "绿波红波", 248: "蓝波绿波", 249: "绿波红波", 250: "蓝波红波",
+        251: "绿波蓝波", 252: "绿波红波", 253: "绿波蓝波", 254: "绿波红波", 255: "蓝波绿波", 256: "绿波蓝波", 257: "蓝波红波", 258: "绿波蓝波", 259: "绿波红波", 260: "蓝波红波",
+        261: "绿波蓝波", 262: "红波蓝波", 263: "绿波蓝波", 264: "蓝波绿波", 265: "红波蓝波", 266: "绿波红波", 267: "绿波红波", 268: "绿波蓝波", 269: "蓝波红波", 270: "红波绿波",
+        271: "蓝波红波", 272: "绿波红波", 273: "绿波红波", 274: "蓝波绿波", 275: "绿波红波", 276: "红波蓝波", 277: "绿波红波", 278: "绿波蓝波", 279: "红波蓝波", 280: "蓝波绿波",
+        281: "绿波红波", 282: "红波蓝波", 283: "绿波红波", 284: "绿波红波", 285: "绿波红波", 286: "红波绿波", 287: "蓝波绿波", 288: "绿波红波", 289: "红波蓝波", 290: "绿波红波",
+        291: "红波蓝波", 292: "绿波红波", 293: "红波蓝波", 294: "蓝波红波", 295: "绿波红波", 296: "绿波红波", 297: "绿波红波", 298: "红波绿波", 299: "绿波红波", 300: "蓝波绿波",
+        301: "绿波红波", 302: "蓝波绿波", 303: "绿波红波", 304: "绿波蓝波", 305: "绿波红波", 306: "绿波红波", 307: "红波蓝波", 308: "绿波红波", 309: "红波蓝波", 310: "绿波红波",
+        311: "蓝波红波", 312: "绿波红波", 313: "绿波蓝波", 314: "红波绿波", 315: "绿波红波", 316: "红波绿波", 317: "绿波蓝波", 318: "红波绿波", 319: "绿波红波", 320: "蓝波红波",
+        321: "红波蓝波", 322: "绿波蓝波", 323: "蓝波绿波", 324: "红波蓝波", 325: "绿波红波", 326: "红波绿波", 327: "蓝波红波", 328: "绿波蓝波", 329: "红波蓝波", 330: "绿波红波",
+        331: "红波绿波", 332: "绿波蓝波", 333: "红波蓝波", 334: "绿波蓝波", 335: "绿波红波", 336: "绿波红波", 337: "绿波蓝波", 338: "绿波红波", 339: "绿波红波", 340: "红波绿波",
+        341: "绿波蓝波", 342: "绿波红波", 343: "绿波蓝波", 344: "绿波红波", 345: "蓝波红波", 346: "红波蓝波", 347: "绿波蓝波", 348: "蓝波红波", 349: "绿波红波", 350: "绿波红波",
+        351: "红波蓝波", 352: "绿波红波", 353: "蓝波绿波", 354: "绿波蓝波", 355: "红波蓝波", 356: "绿波蓝波", 357: "绿波红波", 358: "红波绿波", 359: "蓝波绿波", 360: "绿波红波",
+        361: "绿波蓝波", 362: "绿波蓝波", 363: "绿波红波", 364: "红波蓝波", 365: "蓝波红波", 366: "绿波红波"
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error(" ");
+            });
+    }
+
+    function getPredictForKy(kyNum) {
+        let actualKy = ((kyNum - 1) % 366) + 1;
+        if (STATIC_PREDICTIONS[actualKy]) {
+            return STATIC_PREDICTIONS[actualKy];
+        }
+        return "蓝波红波";
+    }
+
+    function checkGroupHit(numStr, groupName) {
+        let clean = String(numStr).replace(/\D/g, '');
+        if (!clean) return false;
+        let n = parseInt(clean, 10);
+        if (isNaN(n)) return false;
+        return WAVE_GROUPS[groupName] ? WAVE_GROUPS[groupName].includes(n) : false;
+    }
+
+    function formatTwoDigits(val) {
+        let cleanVal = String(val).trim();
+        let num = parseInt(cleanVal.replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    function renderPredictionHtml(predStr, hitNum = '') {
+        let items = predStr.match(/.{1,2}/g) || [];
+        return items.map(grp => {
+            if (hitNum && checkGroupHit(hitNum, grp)) {
+                return `【<span class="win-animal">${grp}</span>】`;
+            } else {
+                return `【${grp}】`;
+            }
+        }).join('');
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined) {
+                        let valStr = String(r[7].v).trim();
+                        if (valStr !== '' && valStr !== '0' && valStr !== '00') {
+                            numTeFormatted = formatTwoDigits(valStr);
+                        }
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isDone = item.numTe !== '' && item.numTe !== '00';
+                if (isDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predicted = getPredictForKy(item.kyNum);
+                let isValidNum = duLieuMap.hasOwnProperty(item.numTe);
+                
+                let isWin = false;
+                if (isValidNum) {
+                    let items = predicted.match(/.{1,2}/g) || [];
+                    isWin = items.some(grp => checkGroupHit(item.numTe, grp));
+                }
+
+                evaluatedDoneList.push({ item, predicted, isWin });
+            }
+
+            let checkLatestMisses = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestMisses++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestMisses < 3) {
+                let consecutiveMisses = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveMisses++;
+                        if (consecutiveMisses >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveMisses = 0;
+                    }
+                }
+            } else {
+                cutoffIndex = evaluatedDoneList.length;
+            }
+
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictForKy(nextKyNum);
+            let kyStrNext = String(nextKyNum).padStart(3, '0');
+
+            let htmlNextKy = `<p style="margin:0px;">${kyStrNext}期：特码波路${renderPredictionHtml(predictNext)}开:<span style="color:#FF00FF;">？00准</span></p>`;
+
+            let historyOutputs = [];
+            if (checkLatestMisses < 3) {
+                for (let i = cutoffIndex; i < evaluatedDoneList.length; i++) {
+                    let entry = evaluatedDoneList[i];
+                    if (entry.isWin) {
+                        let shengXiaoWin = duLieuMap[entry.item.numTe] || '';
+                        let resStrWin = shengXiaoWin + entry.item.numTe;
+                        let kyStr = String(entry.item.kyNum).padStart(3, '0');
+                        let formattedPredictHtml = renderPredictionHtml(entry.predicted, entry.item.numTe);
+
+                        historyOutputs.push(`<p style="margin:0px;">${kyStr}期：特码波路${formattedPredictHtml}开:<span style="color:#FF00FF;">${resStrWin}准</span></p>`);
+                    }
+                }
+            }
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = String(nextKyNum + 1).padStart(3, '0');
+                let kyStr2 = String(nextKyNum + 2).padStart(3, '0');
+                let defaultHtml1 = `<p style="margin:0px;">${kyStr1}期：特码波路【發發】【發發】开:<span style="color:#FF00FF;">？00准</span></p>`;
+                let defaultHtml2 = `<p style="margin:0px;">${kyStr2}期：特码波路【發發】【發發】开:<span style="color:#FF00FF;">？00准</span></p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = String(nextKyNum + 1).padStart(3, '0');
+                let defaultHtmlExtra = `<p style="margin:0px;">${kyStrExtra}期：特码波路【發發】【發發】开:<span style="color:#FF00FF;">？00准</span></p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
