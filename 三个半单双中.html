@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门六合宝典-三个半中特码-长期免费</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .win-animal {
+            color: #FF0000;
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}&_=${Date.now()}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}&_=${Date.now()}`;
+
+    let duLieuMap = {};
+
+    const NUM_GROUPS = {
+        "小单": [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23],
+        "小双": [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24],
+        "大单": [25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49],
+        "大双": [26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48]
+    };
+
+    const STATIC_PREDICTIONS = {
+        1: "大单小单小双", 2: "小单小双大双", 3: "小双大双小单", 4: "大单小双大双", 5: "大双小单小双", 6: "大单小双小单", 7: "小单大单大双", 8: "大单小双小单", 9: "小单大单小双", 10: "大双小双小单",
+        11: "小单大单大双", 12: "大双小单小双", 13: "小双大双大单", 14: "大单小双大双", 15: "小单大单小双", 16: "大单小单大双", 17: "小单大单小双", 18: "小双大双大单", 19: "大双大单小单", 20: "小双大双大单",
+        21: "大单小双大双", 22: "大双大单小单", 23: "大单小双大双", 24: "大双大单小双", 25: "大单小单大双", 26: "小单小双大单", 27: "小双大双小单", 28: "大单小双大双", 29: "小双大双大单", 30: "大单小双小单",
+        31: "大双小单小双", 32: "大单大双小单", 33: "大双小单小双", 34: "小双大单大双", 35: "小单大双小双", 36: "大双小双小单", 37: "大单小单小双", 38: "小双大单小单", 39: "小单大双大单", 40: "大双大单小双",
+        41: "小双大双大单", 42: "大单小单小双", 43: "小双大双小单", 44: "小单小双大双", 45: "小双大双大单", 46: "大单小单大双", 47: "小单大双小双", 48: "大双小单大单", 49: "大单小双大双", 50: "小单大双大单",
+        51: "小双小单大双", 52: "大单小双小单", 53: "大双大单小双", 54: "大单小单大双", 55: "小单小双大单", 56: "小双大单小单", 57: "小单小双大双", 58: "小双大双小单", 59: "大单小双大双", 60: "小单大双小双",
+        61: "大双小双大单", 62: "小双大单大双", 63: "小单大双大单", 64: "大单小双小单", 65: "小双小单大单", 66: "大单小双大双", 67: "大双大单小单", 68: "小单大双大单", 69: "大单小单小双", 70: "小单大双大单",
+        71: "大双小单小双", 72: "小双大双大单", 73: "大单小单大双", 74: "小单大双小双", 75: "小双小单大单", 76: "小单大单大双", 77: "大双小单小双", 78: "小单大双大单", 79: "大单小单大双", 80: "大双大单小双",
+        81: "小双大双大单", 82: "大双小单小双", 83: "大单小双小单", 84: "大双小单小双", 85: "小双大双大单", 86: "大单小单大双", 87: "小单小双大单", 88: "大单大双小单", 89: "小单大单大双", 90: "大双小单小双",
+        91: "大单大双小单", 92: "小单小双大单", 93: "小双小单大双", 94: "大双小双小单", 95: "大单大双小双", 96: "小单小双大双", 97: "大双小单大单", 98: "小单大双小双", 99: "大双小双小单", 100: "小双大单大双",
+        101: "大单小双小单", 102: "小双大单大双", 103: "大单小单小双", 104: "小单小双大双", 105: "小双大单小单", 106: "小单小双大单", 107: "小双小单大双", 108: "小单大单小双", 109: "大双小双小单", 110: "小单大双大单",
+        111: "大单小双大双", 112: "小单大单小双", 113: "小双大双大单", 114: "大双大单小双", 115: "小双小单大双", 116: "大双小双大单", 117: "小单大单大双", 118: "小双小单大单", 119: "大双大单小单", 120: "小单小双大单",
+        121: "小双大单小单", 122: "大双小双大单", 123: "小单大双小双", 124: "小双大单大双", 125: "大双小单小双", 126: "大单小双大双", 127: "小双大双大单", 128: "小单小双大双", 129: "大双小单大单", 130: "小双大双小单",
+        131: "大单小单大双", 132: "小单大双大单", 133: "大双大单小双", 134: "大单大双小单", 135: "大双大单小双", 136: "大单小双大双", 137: "大双大单小单", 138: "小单小双大双", 139: "大双大单小单", 140: "小双小单大单",
+        141: "小单大双小双", 142: "大双大单小单", 143: "小双小单大双", 144: "大单大双小单", 145: "小单小双大双", 146: "小双大双大单", 147: "大单小双小单", 148: "小单大单小双", 149: "大单大双小单", 150: "大双小双大单",
+        151: "小双大单小单", 152: "大双小双大单", 153: "小双小单大双", 154: "大双大单小双", 155: "大单小双大双", 156: "小双大单小单", 157: "大单小双大双", 158: "大双小单小双", 159: "小单大双大单", 160: "大单小双大双",
+        161: "小单大双大单", 162: "大单小双小单", 163: "小双小单大双", 164: "小单大双大单", 165: "小双大单小单", 166: "小单大双小双", 167: "小双大单大双", 168: "大单大双小单", 169: "小单大单小双", 170: "小双小单大双",
+        171: "小单大单小双", 172: "小双大双大单", 173: "小单大单大双", 174: "大双小单大单", 175: "大单小双小单", 176: "小双大单大双", 177: "小单大双大单", 178: "小双大单小单", 179: "小单小双大单", 180: "大单小单大双",
+        181: "小双大双大单", 182: "大单小双小单", 183: "小双大双大单", 184: "大单小单小双", 185: "小双大双大单", 186: "大双大单小双", 187: "小双小单大单", 188: "小单大单小双", 189: "小双大双大单", 190: "大双小双小单",
+        191: "小单大单大双", 192: "大双小双小单", 193: "小双小单大单", 194: "大单大双小单", 195: "小双小单大单", 196: "小单大双小双", 197: "大单小双大双", 198: "小双小单大单", 199: "小单大单大双", 200: "小双大双小单",
+        201: "大单大双小双", 202: "小单小双大双", 203: "小双大单小单", 204: "小单大双大单", 205: "大双小单小双", 206: "小双大单大双", 207: "大单小双小单", 208: "小单大双小双", 209: "大双小双大单", 210: "小双大单大双",
+        211: "小单大双小双", 212: "小双小单大双", 213: "大单小双小单", 214: "大双小单大单", 215: "大单小双大双", 216: "小双小单大单", 217: "小单小双大双", 218: "小双大双小单", 219: "大双小单大单", 220: "小单大单大双",
+        221: "大双小单小双", 222: "小双大双小单", 223: "大双大单小双", 224: "小单大双大单", 225: "小双大单小单", 226: "大单大双小双", 227: "小单小双大单", 228: "大单小单大双", 229: "小单大双小双", 230: "大双小双小单",
+        231: "小双大双大单", 232: "小单大单小双", 233: "大单大双小单", 234: "大双大单小双", 235: "小双大双大单", 236: "大双小单小双", 237: "大单大双小单", 238: "小双大单大双", 239: "大双小单小双", 240: "小单大单大双",
+        241: "大双小单小双", 242: "小单小双大双", 243: "大单大双小双", 244: "大双小单大单", 245: "大单小双小单", 246: "小单大双小双", 247: "大双小双小单", 248: "大单大双小双", 249: "小双大单小单", 250: "大单小单小双",
+        251: "小双大单大双", 252: "大双小双小单", 253: "小双大双大单", 254: "大双大单小单", 255: "大单大双小双", 256: "大双小双大单", 257: "大单小单大双", 258: "大双小双大单", 259: "小双大单小单", 260: "大单小单小双",
+        261: "小双大双大单", 262: "小单大单大双", 263: "小双大双大单", 264: "大单小双大双", 265: "小单大双大单", 266: "小双小单大双", 267: "大双大单小单", 268: "小双大双大单", 269: "大单小单小双", 270: "小单小双大双",
+        271: "大单小单小双", 272: "小双大双小单", 273: "大双小单大单", 274: "大单大双小双", 275: "小双大单小单", 276: "小单大双大单", 277: "大双小单小双", 278: "小双大单大双", 279: "小单大双大单", 280: "大单小双大双",
+        281: "小双大单小单", 282: "小单大双大单", 283: "大双小单小双", 284: "小双大双小单", 285: "大双小单大单", 286: "小单大双小双", 287: "大单小双大双", 288: "大双小单小双", 289: "小单大单大双", 290: "大双小单小双",
+        291: "小单大单大双", 292: "小双大双小单", 293: "小单大单大双", 294: "大单小双小单", 295: "大双小单大单", 296: "小双大单小单", 297: "大双小单小双", 298: "小单小双大双", 299: "小双大单小单", 300: "大单大双小双",
+        301: "小双大单小单", 302: "大单小双大双", 303: "大双大单小单", 304: "小双大双大单", 305: "大双小双小单", 306: "小双小单大双", 307: "小单小双大单", 308: "大双大单小双", 309: "小单小双大单", 310: "小双大单小单",
+        311: "大单小单大双", 312: "小双大双小单", 313: "大双小双大单", 314: "小单大双小双", 315: "大双小单大单", 316: "小单大双小双", 317: "小双小单大单", 318: "小单大双小双", 319: "小双小单大双", 320: "大单大双小单",
+        321: "小单小双大单", 322: "小双大单大双", 323: "大单大双小双", 324: "小单小双大单", 325: "大双大单小双", 326: "小单小双大双", 327: "大单小单小双", 328: "大双小双大单", 329: "小单大单小双", 330: "小双大双小单",
+        331: "小单小双大双", 332: "小双小单大单", 333: "小单大单小双", 334: "小双大双大单", 335: "大双小双小单", 336: "小双小单大双", 337: "大双小双大单", 338: "小双小单大双", 339: "大双大单小双", 340: "小单小双大双",
+        341: "小双小单大单", 342: "大双大单小双", 343: "小双大双大单", 344: "大双小双小单", 345: "大单小单大双", 346: "小单大单小双", 347: "小双大双大单", 348: "大单小双小单", 349: "大双小单小双", 350: "小双大双小单",
+        351: "小单大单小双", 352: "大双小双小单", 353: "大单大双小双", 354: "大双小双大单", 355: "小单大单大双", 356: "小双小单大单", 357: "大双小双小单", 358: "小单大双小双", 359: "大单小双大双", 360: "小双大单小单",
+        361: "大双小双大单", 362: "小双大单大双", 363: "大双小双小单", 364: "小单大双大单", 365: "大单小双小单", 366: "大双大单小双"
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error(" ");
+            });
+    }
+
+    function getPredictForKy(kyNum) {
+        let actualKy = ((kyNum - 1) % 366) + 1;
+        if (STATIC_PREDICTIONS[actualKy]) {
+            return STATIC_PREDICTIONS[actualKy];
+        }
+        return "大单小单小双";
+    }
+
+    function checkGroupHit(numStr, groupName) {
+        let clean = String(numStr).replace(/\D/g, '');
+        if (!clean) return false;
+        let n = parseInt(clean, 10);
+        if (isNaN(n)) return false;
+        return NUM_GROUPS[groupName] ? NUM_GROUPS[groupName].includes(n) : false;
+    }
+
+    function formatTwoDigits(val) {
+        let cleanVal = String(val).trim();
+        let num = parseInt(cleanVal.replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined) {
+                        let valStr = String(r[7].v).trim();
+                        if (valStr !== '' && valStr !== '0' && valStr !== '00') {
+                            numTeFormatted = formatTwoDigits(valStr);
+                        }
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isDone = item.numTe !== '' && item.numTe !== '00';
+                if (isDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predicted = getPredictForKy(item.kyNum);
+                let isValidNum = duLieuMap.hasOwnProperty(item.numTe);
+                
+                let isWin = false;
+                if (isValidNum) {
+                    let items = predicted.match(/.{1,2}/g) || [];
+                    isWin = items.some(grp => checkGroupHit(item.numTe, grp));
+                }
+
+                evaluatedDoneList.push({ item, predicted, isWin });
+            }
+
+            let checkLatestMisses = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestMisses++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestMisses < 3) {
+                let consecutiveMisses = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveMisses++;
+                        if (consecutiveMisses >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveMisses = 0;
+                    }
+                }
+            } else {
+                cutoffIndex = evaluatedDoneList.length;
+            }
+
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictForKy(nextKyNum);
+            let kyStrNext = String(nextKyNum).padStart(3, '0');
+
+            let htmlNextKy = `<h6 style="font-size:small;font-weight:normal;"> <b>${kyStrNext}期:<span style="color:#0000FF;">三个半中特码</span></b>【${predictNext}<b>】开:<span style="color:#FF0000;">？00</span><span style="color:#0000FF;">准</span></b> </h6>`;
+
+            let historyOutputs = [];
+            if (checkLatestMisses < 3) {
+                for (let i = cutoffIndex; i < evaluatedDoneList.length; i++) {
+                    let entry = evaluatedDoneList[i];
+                    if (entry.isWin) {
+                        let shengXiaoWin = duLieuMap[entry.item.numTe] || '';
+                        let resStrWin = shengXiaoWin + entry.item.numTe;
+                        let kyStr = String(entry.item.kyNum).padStart(3, '0');
+                        
+                        let items = entry.predicted.match(/.{1,2}/g) || [];
+                        let formattedPredictHtml = items.map(grp => {
+                            if (checkGroupHit(entry.item.numTe, grp)) {
+                                return `<span class="win-animal">${grp}</span>`;
+                            } else {
+                                return grp;
+                            }
+                        }).join('');
+
+                        historyOutputs.push(`<h6 style="font-size:small;font-weight:normal;"> <b>${kyStr}期:<span style="color:#0000FF;">三个半中特码</span></b>【${formattedPredictHtml}<b>】开:<span style="color:#FF0000;">${resStrWin}</span><span style="color:#0000FF;">准</span></b> </h6>`);
+                    }
+                }
+            }
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = String(nextKyNum + 1).padStart(3, '0');
+                let kyStr2 = String(nextKyNum + 2).padStart(3, '0');
+                let defaultHtml1 = `<h6 style="font-size:small;font-weight:normal;"> <b>${kyStr1}期:<span style="color:#0000FF;">三个半中特码</span></b>【發發發發發發<b>】开:<span style="color:#FF0000;">？00</span><span style="color:#0000FF;">准</span></b> </h6>`;
+                let defaultHtml2 = `<h6 style="font-size:small;font-weight:normal;"> <b>${kyStr2}期:<span style="color:#0000FF;">三个半中特码</span></b>【發發發發發發<b>】开:<span style="color:#FF0000;">？00</span><span style="color:#0000FF;">准</span></b> </h6>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = String(nextKyNum + 1).padStart(3, '0');
+                let defaultHtmlExtra = `<h6 style="font-size:small;font-weight:normal;"> <b>${kyStrExtra}期:<span style="color:#0000FF;">三个半中特码</span></b>【發發發發發發<b>】开:<span style="color:#FF0000;">？00</span><span style="color:#0000FF;">准</span></b> </h6>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
