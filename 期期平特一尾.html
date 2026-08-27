@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>期期平特一尾</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .win-animal {
+            color: #FF0000;
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}&_=${Date.now()}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}&_=${Date.now()}`;
+
+    let duLieuMap = {};
+
+    // Danh sách dự đoán cố định 366 kỳ dạng "X尾X尾X尾"
+    const STATIC_PREDICTIONS = {
+        1: "1尾1尾1尾", 2: "7尾7尾7尾", 3: "5尾5尾5尾", 4: "6尾6尾6尾", 5: "8尾8尾8尾", 6: "2尾2尾2尾", 7: "0尾0尾0尾", 8: "1尾1尾1尾", 9: "7尾7尾7尾", 10: "4尾4尾4尾",
+        11: "6尾6尾6尾", 12: "5尾5尾5尾", 13: "8尾8尾8尾", 14: "7尾7尾7尾", 15: "0尾0尾0尾", 16: "4尾4尾4尾", 17: "1尾1尾1尾", 18: "5尾5尾5尾", 19: "3尾3尾3尾", 20: "8尾8尾8尾",
+        21: "2尾2尾2尾", 22: "1尾1尾1尾", 23: "9尾9尾9尾", 24: "7尾7尾7尾", 25: "6尾6尾6尾", 26: "2尾2尾2尾", 27: "1尾1尾1尾", 28: "8尾8尾8尾", 29: "3尾3尾3尾", 30: "0尾0尾0尾",
+        31: "5尾5尾5尾", 32: "4尾4尾4尾", 33: "7尾7尾7尾", 34: "2尾2尾2尾", 35: "0尾0尾0尾", 36: "8尾8尾8尾", 37: "4尾4尾4尾", 38: "1尾1尾1尾", 39: "3尾3尾3尾", 40: "0尾0尾0尾",
+        41: "5尾5尾5尾", 42: "2尾2尾2尾", 43: "6尾6尾6尾", 44: "4尾4尾4尾", 45: "9尾9尾9尾", 46: "1尾1尾1尾", 47: "8尾8尾8尾", 48: "3尾3尾3尾", 49: "0尾0尾0尾", 50: "4尾4尾4尾",
+        51: "9尾9尾9尾", 52: "1尾1尾1尾", 53: "5尾5尾5尾", 54: "0尾0尾0尾", 55: "8尾8尾8尾", 56: "3尾3尾3尾", 57: "1尾1尾1尾", 58: "4尾4尾4尾", 59: "2尾2尾2尾", 60: "7尾7尾7尾",
+        61: "0尾0尾0尾", 62: "9尾9尾9尾", 63: "1尾1尾1尾", 64: "6尾6尾6尾", 65: "3尾3尾3尾", 66: "2尾2尾2尾", 67: "9尾9尾9尾", 68: "4尾4尾4尾", 69: "7尾7尾7尾", 70: "3尾3尾3尾",
+        71: "6尾6尾6尾", 72: "8尾8尾8尾", 73: "0尾0尾0尾", 74: "4尾4尾4尾", 75: "5尾5尾5尾", 76: "2尾2尾2尾", 77: "1尾1尾1尾", 78: "8尾8尾8尾", 79: "6尾6尾6尾", 80: "3尾3尾3尾",
+        81: "9尾9尾9尾", 82: "0尾0尾0尾", 83: "5尾5尾5尾", 84: "6尾6尾6尾", 85: "2尾2尾2尾", 86: "3尾3尾3尾", 87: "0尾0尾0尾", 88: "9尾9尾9尾", 89: "1尾1尾1尾", 90: "6尾6尾6尾",
+        91: "4尾4尾4尾", 92: "3尾3尾3尾", 93: "8尾8尾8尾", 94: "9尾9尾9尾", 95: "6尾6尾6尾", 96: "7尾7尾7尾", 97: "4尾4尾4尾", 98: "0尾0尾0尾", 99: "5尾5尾5尾", 100: "3尾3尾3尾",
+        101: "8尾8尾8尾", 102: "9尾9尾9尾", 103: "4尾4尾4尾", 104: "6尾6尾6尾", 105: "7尾7尾7尾", 106: "0尾0尾0尾", 107: "1尾1尾1尾", 108: "5尾5尾5尾", 109: "4尾4尾4尾", 110: "8尾8尾8尾",
+        111: "3尾3尾3尾", 112: "6尾6尾6尾", 113: "0尾0尾0尾", 114: "9尾9尾9尾", 115: "4尾4尾4尾", 116: "1尾1尾1尾", 117: "7尾7尾7尾", 118: "0尾0尾0尾", 119: "5尾5尾5尾", 120: "8尾8尾8尾",
+        121: "1尾1尾1尾", 122: "3尾3尾3尾", 123: "4尾4尾4尾", 124: "9尾9尾9尾", 125: "6尾6尾6尾", 126: "0尾0尾0尾", 127: "3尾3尾3尾", 128: "2尾2尾2尾", 129: "8尾8尾8尾", 130: "4尾4尾4尾",
+        131: "6尾6尾6尾", 132: "7尾7尾7尾", 133: "2尾2尾2尾", 134: "0尾0尾0尾", 135: "4尾4尾4尾", 136: "1尾1尾1尾", 137: "9尾9尾9尾", 138: "2尾2尾2尾", 139: "5尾5尾5尾", 140: "4尾4尾4尾",
+        141: "6尾6尾6尾", 142: "8尾8尾8尾", 143: "7尾7尾7尾", 144: "5尾5尾5尾", 145: "4尾4尾4尾", 146: "3尾3尾3尾", 147: "6尾6尾6尾", 148: "1尾1尾1尾", 149: "8尾8尾8尾", 150: "0尾0尾0尾",
+        151: "2尾2尾2尾", 152: "6尾6尾6尾", 153: "3尾3尾3尾", 154: "4尾4尾4尾", 155: "0尾0尾0尾", 156: "8尾8尾8尾", 157: "7尾7尾7尾", 158: "1尾1尾1尾", 159: "9尾9尾9尾", 160: "4尾4尾4尾",
+        161: "3尾3尾3尾", 162: "2尾2尾2尾", 163: "7尾7尾7尾", 164: "6尾6尾6尾", 165: "1尾1尾1尾", 166: "5尾5尾5尾", 167: "8尾8尾8尾", 168: "7尾7尾7尾", 169: "4尾4尾4尾", 170: "3尾3尾3尾",
+        171: "9尾9尾9尾", 172: "6尾6尾6尾", 173: "8尾8尾8尾", 174: "1尾1尾1尾", 175: "5尾5尾5尾", 176: "3尾3尾3尾", 177: "6尾6尾6尾", 178: "9尾9尾9尾", 179: "8尾8尾8尾", 180: "2尾2尾2尾",
+        181: "4尾4尾4尾", 182: "1尾1尾1尾", 183: "3尾3尾3尾", 184: "5尾5尾5尾", 185: "6尾6尾6尾", 186: "4尾4尾4尾", 187: "1尾1尾1尾", 188: "3尾3尾3尾", 189: "5尾5尾5尾", 190: "6尾6尾6尾",
+        191: "4尾4尾4尾", 192: "2尾2尾2尾", 193: "3尾3尾3尾", 194: "1尾1尾1尾", 195: "0尾0尾0尾", 196: "6尾6尾6尾", 197: "9尾9尾9尾", 198: "8尾8尾8尾", 199: "7尾7尾7尾", 200: "4尾4尾4尾",
+        201: "9尾9尾9尾", 202: "8尾8尾8尾", 203: "7尾7尾7尾", 204: "4尾4尾4尾", 205: "3尾3尾3尾", 206: "1尾1尾1尾", 207: "2尾2尾2尾", 208: "8尾8尾8尾", 209: "4尾4尾4尾", 210: "5尾5尾5尾",
+        211: "1尾1尾1尾", 212: "2尾2尾2尾", 213: "8尾8尾8尾", 214: "3尾3尾3尾", 215: "6尾6尾6尾", 216: "5尾5尾5尾", 217: "9尾9尾9尾", 218: "7尾7尾7尾", 219: "2尾2尾2尾", 220: "0尾0尾0尾",
+        221: "4尾4尾4尾", 222: "8尾8尾8尾", 223: "1尾1尾1尾", 224: "5尾5尾5尾", 225: "7尾7尾7尾", 226: "4尾4尾4尾", 227: "2尾2尾2尾", 228: "1尾1尾1尾", 229: "6尾6尾6尾", 230: "7尾7尾7尾",
+        231: "4尾4尾4尾", 232: "0尾0尾0尾", 233: "3尾3尾3尾", 234: "8尾8尾8尾", 235: "9尾9尾9尾", 236: "4尾4尾4尾", 237: "1尾1尾1尾", 238: "3尾3尾3尾", 239: "6尾6尾6尾", 240: "2尾2尾2尾",
+        241: "0尾0尾0尾", 242: "8尾8尾8尾", 243: "3尾3尾3尾", 244: "7尾7尾7尾", 245: "6尾6尾6尾", 246: "1尾1尾1尾", 247: "4尾4尾4尾", 248: "8尾8尾8尾", 249: "2尾2尾2尾", 250: "5尾5尾5尾",
+        251: "7尾7尾7尾", 252: "1尾1尾1尾", 253: "4尾4尾4尾", 254: "3尾3尾3尾", 255: "9尾9尾9尾", 256: "0尾0尾0尾", 257: "2尾2尾2尾", 258: "6尾6尾6尾", 259: "5尾5尾5尾", 260: "7尾7尾7尾",
+        261: "1尾1尾1尾", 262: "3尾3尾3尾", 263: "8尾8尾8尾", 264: "4尾4尾4尾", 265: "2尾2尾2尾", 266: "7尾7尾7尾", 267: "5尾5尾5尾", 268: "0尾0尾0尾", 269: "6尾6尾6尾", 270: "8尾8尾8尾",
+        271: "9尾9尾9尾", 272: "5尾5尾5尾", 273: "3尾3尾3尾", 274: "6尾6尾6尾", 275: "7尾7尾7尾", 276: "1尾1尾1尾", 277: "0尾0尾0尾", 278: "9尾9尾9尾", 279: "3尾3尾3尾", 280: "4尾4尾4尾",
+        281: "8尾8尾8尾", 282: "7尾7尾7尾", 283: "2尾2尾2尾", 284: "1尾1尾1尾", 285: "6尾6尾6尾", 286: "4尾4尾4尾", 287: "9尾9尾9尾", 288: "7尾7尾7尾", 289: "5尾5尾5尾", 290: "2尾2尾2尾",
+        291: "4尾4尾4尾", 292: "0尾0尾0尾", 293: "3尾3尾3尾", 294: "1尾1尾1尾", 295: "9尾9尾9尾", 296: "6尾6尾6尾", 297: "8尾8尾8尾", 298: "7尾7尾7尾", 299: "3尾3尾3尾", 300: "0尾0尾0尾",
+        301: "1尾1尾1尾", 302: "8尾8尾8尾", 303: "7尾7尾7尾", 304: "9尾9尾9尾", 305: "6尾6尾6尾", 306: "2尾2尾2尾", 307: "3尾3尾3尾", 308: "4尾4尾4尾", 309: "8尾8尾8尾", 310: "9尾9尾9尾",
+        311: "0尾0尾0尾", 312: "5尾5尾5尾", 313: "2尾2尾2尾", 314: "3尾3尾3尾", 315: "9尾9尾9尾", 316: "8尾8尾8尾", 317: "6尾6尾6尾", 318: "5尾5尾5尾", 319: "0尾0尾0尾", 320: "7尾7尾7尾",
+        321: "2尾2尾2尾", 322: "9尾9尾9尾", 323: "6尾6尾6尾", 324: "8尾8尾8尾", 325: "4尾4尾4尾", 326: "3尾3尾3尾", 327: "9尾9尾9尾", 328: "5尾5尾5尾", 329: "7尾7尾7尾", 330: "4尾4尾4尾",
+        331: "1尾1尾1尾", 332: "2尾2尾2尾", 333: "5尾5尾5尾", 334: "7尾7尾7尾", 335: "9尾9尾9尾", 336: "0尾0尾0尾", 337: "6尾6尾6尾", 338: "1尾1尾1尾", 339: "2尾2尾2尾", 340: "9尾9尾9尾",
+        341: "5尾5尾5尾", 342: "8尾8尾8尾", 343: "0尾0尾0尾", 344: "4尾4尾4尾", 345: "7尾7尾7尾", 346: "5尾5尾5尾", 347: "1尾1尾1尾", 348: "6尾6尾6尾", 349: "4尾4尾4尾", 350: "7尾7尾7尾",
+        351: "5尾5尾5尾", 352: "1尾1尾1尾", 353: "2尾2尾2尾", 354: "0尾0尾0尾", 355: "8尾8尾8尾", 356: "4尾4尾4尾", 357: "1尾1尾1尾", 358: "2尾2尾2尾", 359: "6尾6尾6尾", 360: "7尾7尾7尾",
+        361: "4尾4尾4尾", 362: "1尾1尾1尾", 363: "5尾5尾5尾", 364: "2尾2尾2尾", 365: "8尾8尾8尾", 366: "7尾7尾7尾"
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error(" ");
+            });
+    }
+
+    function getPredictForKy(kyNum) {
+        let actualKy = ((kyNum - 1) % 366) + 1;
+        return STATIC_PREDICTIONS[actualKy] || "0尾0尾0尾";
+    }
+
+    function formatTwoDigits(val) {
+        let cleanVal = String(val).trim();
+        let num = parseInt(cleanVal.replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    function formatThreeDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '001';
+        return String(num).padStart(3, '0');
+    }
+
+    async function initPredict() {
+        try {
+            // Lấy dữ liệu map số -> con giáp từ sheet DULIEU
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    // Thứ tự ưu tiên: Cột 7 (Giải ĐB) -> Cột 1 đến 6 (Giải 1 -> 6)
+                    let orderedColumns = [7, 1, 2, 3, 4, 5, 6];
+                    let numbersInDraw = [];
+
+                    for (let colIdx of orderedColumns) {
+                        if (r[colIdx] && r[colIdx].v !== null && r[colIdx].v !== undefined) {
+                            let valStr = String(r[colIdx].v).trim();
+                            if (valStr !== '' && valStr !== '0' && valStr !== '00') {
+                                let formatted = formatTwoDigits(valStr);
+                                if (formatted) {
+                                    numbersInDraw.push(formatted);
+                                }
+                            }
+                        }
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            drawNumbers: numbersInDraw
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isDone = item.drawNumbers && item.drawNumbers.length > 0;
+                if (isDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predicted = getPredictForKy(item.kyNum);
+                let targetTail = predicted[0];
+                let isWin = false;
+                let winNumber = "";
+                let winAnimal = "";
+
+                // Ưu tiên kiểm tra từ Giải ĐB -> Giải 6
+                for (let numStr of item.drawNumbers) {
+                    let numInt = parseInt(numStr, 10);
+                    // Chỉ xét các số trong phạm vi từ 01 đến 49 (1 -> 49)
+                    if (numInt >= 1 && numInt <= 49) {
+                        let lastDigit = numStr.slice(-1);
+                        if (lastDigit === targetTail) {
+                            isWin = true;
+                            winNumber = numStr;
+                            winAnimal = duLieuMap[numStr] || '';
+                            break;
+                        }
+                    }
+                }
+                
+                evaluatedDoneList.push({ item, isWin, predicted, targetTail, winNumber, winAnimal });
+            }
+
+            let checkLatestMisses = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestMisses++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestMisses < 3) {
+                let consecutiveMisses = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveMisses++;
+                        if (consecutiveMisses >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveMisses = 0;
+                    }
+                }
+            } else {
+                cutoffIndex = evaluatedDoneList.length;
+            }
+
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictForKy(nextKyNum);
+            let kyStrNext = formatThreeDigits(nextKyNum);
+
+            let htmlNextKy = `<p style="font-weight:bold;">${kyStrNext}期:<span style="color:#0066FF;">平特一尾</span>【<span style="color:#339966;">${predictNext}</span>】开:？00准</p>`;
+
+            let historyOutputs = [];
+            if (checkLatestMisses < 3) {
+                for (let i = cutoffIndex; i < evaluatedDoneList.length; i++) {
+                    let evalItem = evaluatedDoneList[i];
+                    let item = evalItem.item;
+
+                    if (evalItem.isWin) {
+                        let predicted = getPredictForKy(item.kyNum);
+                        let kyStr = formatThreeDigits(item.kyNum);
+                        let resStrWin = evalItem.winAnimal + evalItem.winNumber;
+
+                        let formattedPredictHtml = `<span class="win-animal">${predicted}</span>`;
+                        historyOutputs.push(`<p style="font-weight:bold;">${kyStr}期:<span style="color:#0066FF;">平特一尾</span>【${formattedPredictHtml}】开:${resStrWin}准</p>`);
+                    }
+                }
+            }
+
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = formatThreeDigits(nextKyNum + 1);
+                let kyStr2 = formatThreeDigits(nextKyNum + 2);
+                let defaultHtml1 = `<p style="font-weight:bold;">${kyStr1}期:<span style="color:#0066FF;">平特一尾</span>【<span style="color:#339966;">$尾$尾$尾</span>】开:？00准</p>`;
+                let defaultHtml2 = `<p style="font-weight:bold;">${kyStr2}期:<span style="color:#0066FF;">平特一尾</span>【<span style="color:#339966;">$尾$尾$尾</span>】开:？00准</p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = formatThreeDigits(nextKyNum + 1);
+                let defaultHtmlExtra = `<p style="font-weight:bold;">${kyStrExtra}期:<span style="color:#0066FF;">平特一尾</span>【<span style="color:#339966;">$尾$尾$尾</span>】开:？00准</p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
