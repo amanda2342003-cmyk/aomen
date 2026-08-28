@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门六合彩【绝杀一段】精准猛料！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}`;
+
+    let duLieuMap = {};
+
+    // Định nghĩa các tập hợp số tương ứng với từng đoạn
+    const DUAN_MAP = {
+        "一段": [1, 2, 3, 4, 5, 6, 7],
+        "二段": [8, 9, 10, 11, 12, 13, 14],
+        "三段": [15, 16, 17, 18, 19, 20, 21],
+        "四段": [22, 23, 24, 25, 26, 27, 28],
+        "五段": [29, 30, 31, 32, 33, 34, 35],
+        "六段": [36, 37, 38, 39, 40, 41, 42],
+        "七段": [43, 44, 45, 46, 47, 48, 49]
+    };
+
+    const STATIC_PREDICTIONS = {
+        1: "六段", 2: "四段", 3: "五段", 4: "三段", 5: "一段", 6: "六段", 7: "二段", 8: "三段", 9: "四段", 10: "七段", 11: "一段", 12: "三段", 13: "二段", 14: "六段", 15: "五段", 16: "一段", 17: "二段", 18: "六段", 19: "三段", 20: "四段", 21: "七段", 22: "五段", 23: "三段", 24: "六段", 25: "一段", 26: "七段", 27: "三段", 28: "四段", 29: "五段", 30: "七段", 31: "一段", 32: "二段", 33: "六段", 34: "四段", 35: "七段", 36: "一段", 37: "六段", 38: "二段", 39: "四段", 40: "五段", 41: "一段", 42: "六段", 43: "二段", 44: "七段", 45: "一段", 46: "四段", 47: "六段", 48: "三段", 49: "二段", 50: "四段", 51: "六段", 52: "五段", 53: "一段", 54: "三段", 55: "四段", 56: "六段", 57: "五段", 58: "三段", 59: "一段", 60: "四段", 61: "二段", 62: "五段", 63: "六段", 64: "七段", 65: "三段", 66: "五段", 67: "六段", 68: "七段", 69: "四段", 70: "五段", 71: "一段", 72: "六段", 73: "三段", 74: "四段", 75: "五段", 76: "六段", 77: "七段", 78: "一段", 79: "二段", 80: "四段", 81: "七段", 82: "一段", 83: "六段", 84: "五段", 85: "三段", 86: "四段", 87: "一段", 88: "六段", 89: "七段", 90: "三段", 91: "四段", 92: "二段", 93: "一段", 94: "六段", 95: "七段", 96: "三段", 97: "五段", 98: "六段", 99: "四段", 100: "一段", 101: "六段", 102: "四段", 103: "七段", 104: "一段", 105: "六段", 106: "五段", 107: "七段", 108: "四段", 109: "二段", 110: "一段", 111: "三段", 112: "五段", 113: "七段", 114: "四段", 115: "二段", 116: "一段", 117: "五段", 118: "三段", 119: "七段", 120: "二段", 121: "四段", 122: "三段", 123: "五段", 124: "七段", 125: "二段", 126: "六段", 127: "一段", 128: "五段", 129: "四段", 130: "六段", 131: "三段", 132: "五段", 133: "四段", 134: "一段", 135: "二段", 136: "六段", 137: "七段", 138: "三段", 139: "二段", 140: "四段", 141: "一段", 142: "五段", 143: "三段", 144: "四段", 145: "七段", 146: "五段", 147: "一段", 148: "三段", 149: "二段", 150: "五段", 151: "一段", 152: "三段", 153: "七段", 154: "四段", 155: "六段", 156: "二段", 157: "一段", 158: "三段", 159: "七段", 160: "五段", 161: "二段", 162: "三段", 163: "一段", 164: "五段", 165: "四段", 166: "二段", 167: "七段", 168: "六段", 169: "三段", 170: "四段", 171: "二段", 172: "五段", 173: "七段", 174: "一段", 175: "六段", 176: "四段", 177: "二段", 178: "七段", 179: "五段", 180: "六段", 181: "三段", 182: "四段", 183: "二段", 184: "七段", 185: "一段", 186: "六段", 187: "四段", 188: "三段", 189: "七段", 190: "五段", 191: "四段", 192: "一段", 193: "三段", 194: "七段", 195: "二段", 196: "五段", 197: "四段", 198: "三段", 199: "七段", 200: "二段", 201: "四段", 202: "六段", 203: "三段", 204: "二段", 205: "五段", 206: "七段", 207: "六段", 208: "三段", 209: "四段", 210: "七段", 211: "五段", 212: "二段", 213: "一段", 214: "六段", 215: "五段", 216: "二段", 217: "七段", 218: "三段", 219: "六段", 220: "四段", 221: "二段", 222: "三段", 223: "七段", 224: "五段", 225: "六段", 226: "一段", 227: "三段", 228: "四段", 229: "六段", 230: "五段", 231: "一段", 232: "三段", 233: "四段", 234: "二段", 235: "五段", 236: "七段", 237: "一段", 238: "三段", 239: "四段", 240: "六段", 241: "七段", 242: "二段", 243: "三段", 244: "四段", 245: "六段", 246: "七段", 247: "三段", 248: "四段", 249: "五段", 250: "七段", 251: "二段", 252: "六段", 253: "一段", 254: "五段", 255: "三段", 256: "七段", 257: "四段", 258: "五段", 259: "二段", 260: "六段", 261: "四段", 262: "三段", 263: "二段", 264: "六段", 265: "四段", 266: "三段", 267: "七段", 268: "二段", 269: "六段", 270: "一段", 271: "五段", 272: "七段", 273: "四段", 274: "一段", 275: "六段", 276: "三段", 277: "二段", 278: "五段", 279: "六段", 280: "一段", 281: "三段", 282: "七段", 283: "二段", 284: "六段", 285: "三段", 286: "一段", 287: "七段", 288: "四段", 289: "六段", 290: "三段", 291: "五段", 292: "七段", 293: "四段", 294: "三段", 295: "一段", 296: "五段", 297: "二段", 298: "三段", 299: "六段", 300: "五段", 301: "四段", 302: "六段", 303: "三段", 304: "七段", 305: "四段", 306: "二段", 307: "一段", 308: "六段", 309: "七段", 310: "五段", 311: "三段", 312: "二段", 313: "六段", 314: "一段", 315: "四段", 316: "七段", 317: "五段", 318: "六段", 319: "一段", 320: "七段", 321: "三段", 322: "四段", 323: "二段", 324: "一段", 325: "三段", 326: "四段", 327: "七段", 328: "一段", 329: "五段", 330: "三段", 331: "六段", 332: "二段", 333: "七段", 334: "三段", 335: "一段", 336: "二段", 337: "六段", 338: "五段", 339: "四段", 340: "三段", 341: "七段", 342: "一段", 343: "六段", 344: "四段", 345: "二段", 346: "三段", 347: "六段", 348: "七段", 349: "一段", 350: "四段", 351: "三段", 352: "五段", 353: "二段", 354: "一段", 355: "四段", 356: "三段", 357: "七段", 358: "一段", 359: "六段", 360: "三段", 361: "四段", 362: "七段", 363: "一段", 364: "六段", 365: "五段", 366: "四段"
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error("Invalid response");
+            });
+    }
+
+    function getPredictDuanForKy(kyNum) {
+        let actualKy = ((kyNum - 1) % 366) + 1;
+        return STATIC_PREDICTIONS[actualKy] || "一段";
+    }
+
+    function formatTwoDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined) {
+                        let valStr = String(r[7].v).trim();
+                        if (valStr !== '' && valStr !== '0' && valStr !== '00') {
+                            numTeFormatted = formatTwoDigits(r[7].v);
+                        }
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isDone = item.numTe !== '';
+                if (isDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predictedDuan = getPredictDuanForKy(item.kyNum);
+                let actualNum = parseInt(item.numTe, 10);
+                
+                // Trúng (isWin) khi số mở thưởng KHÔNG nằm trong danh sách số của Đoạn được dự đoán (绝杀)
+                let killNumbers = DUAN_MAP[predictedDuan] || [];
+                let isWin = !isNaN(actualNum) && !killNumbers.includes(actualNum);
+
+                evaluatedDoneList.push({ item, isWin });
+            }
+
+            let checkLatestDeletes = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestDeletes++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestDeletes >= 3) {
+                cutoffIndex = evaluatedDoneList.length;
+            } else {
+                let consecutiveDeletes = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveDeletes++;
+                        if (consecutiveDeletes >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveDeletes = 0;
+                    }
+                }
+            }
+
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictDuanForKy(nextKyNum);
+            let kyStrNext = String(nextKyNum).padStart(3, '0');
+
+            let htmlNextKy = `<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStrNext}期:<span style="color:#FF0000;">绝杀一段</span>【<span style="color:#0000FF;">${predictNext}</span>】开:<span style="color:#008000;">？00</span>中</p>`;
+
+            let historyOutputs = [];
+            if (checkLatestDeletes < 3) {
+                for (let i = cutoffIndex; i < doneList.length; i++) {
+                    let item = doneList[i];
+                    let evaluated = evaluatedDoneList.find(e => e.item.kyNum === item.kyNum);
+                    if (evaluated && evaluated.isWin) {
+                        let predicted = getPredictDuanForKy(item.kyNum);
+                        let shengXiaoWin = duLieuMap[item.numTe] || '';
+                        let resStrWin = shengXiaoWin + item.numTe;
+                        let kyStr = String(item.kyNum).padStart(3, '0');
+                        historyOutputs.push(`<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStr}期:<span style="color:#FF0000;">绝杀一段</span>【<span style="color:#0000FF;">${predicted}</span>】开:<span style="color:#008000;">${resStrWin}</span>中</p>`);
+                    }
+                }
+            }
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = String(nextKyNum + 1).padStart(3, '0');
+                let kyStr2 = String(nextKyNum + 2).padStart(3, '0');
+                let defaultHtml1 = `<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStr1}期:<span style="color:#FF0000;">绝杀一段</span>【<span style="color:#0000FF;">發發</span>】开:<span style="color:#008000;">？00</span>中</p>`;
+                let defaultHtml2 = `<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStr2}期:<span style="color:#FF0000;">绝杀一段</span>【<span style="color:#0000FF;">發發</span>】开:<span style="color:#008000;">？00</span>中</p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = String(nextKyNum + 1).padStart(3, '0');
+                let defaultHtmlExtra = `<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${kyStrExtra}期:<span style="color:#FF0000;">绝杀一段</span>【<span style="color:#0000FF;">發發</span>】开:<span style="color:#008000;">？00</span>中</p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
