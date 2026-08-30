@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门六合彩【绝杀三合】精准猛料！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}`;
+
+    let duLieuMap = {};
+
+    // Định nghĩa tập hợp số cho 13 Hợp
+    const HE_MAP = {
+        "01合": [1, 10],
+        "02合": [2, 11, 20],
+        "03合": [3, 12, 21, 30],
+        "04合": [4, 13, 22, 31, 40],
+        "05合": [5, 14, 23, 32, 41],
+        "06合": [6, 15, 24, 33, 42],
+        "07合": [7, 16, 25, 34, 43],
+        "08合": [8, 17, 26, 35, 44],
+        "09合": [9, 18, 27, 36, 45],
+        "10合": [19, 28, 37, 46],
+        "11合": [29, 38, 47],
+        "12合": [39, 48],
+        "13合": [49]
+    };
+
+    const ALL_HES = ["01合", "02合", "03合", "04合", "05合", "06合", "07合", "08合", "09合", "10合", "11合", "12合", "13合"];
+
+    // Danh sách dự đoán tĩnh (Nếu bạn muốn nhập cố định các kỳ)
+    const STATIC_PREDICTIONS = {
+        1: ["03合", "08合", "11合"],
+        2: ["01合", "05合", "09合"],
+        3: ["02合", "06合", "10合"],
+        4: ["04合", "07合", "12合"],
+        5: ["03合", "09合", "13合"]
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error("Invalid response");
+            });
+    }
+
+    // Hàm lấy 3 Hợp độc lập không trùng nhau
+    function getPredictForKy(kyNum) {
+        let actualKy = ((kyNum - 1) % 366) + 1;
+        if (STATIC_PREDICTIONS[actualKy]) {
+            return STATIC_PREDICTIONS[actualKy];
+        }
+        
+        let idx1 = (actualKy * 3 + 1) % 13;
+        let idx2 = (actualKy * 5 + 4) % 13;
+        if (idx2 === idx1) idx2 = (idx2 + 1) % 13;
+        
+        let idx3 = (actualKy * 7 + 8) % 13;
+        while (idx3 === idx1 || idx3 === idx2) {
+            idx3 = (idx3 + 1) % 13;
+        }
+
+        let result = [ALL_HES[idx1], ALL_HES[idx2], ALL_HES[idx3]];
+        result.sort();
+        return result;
+    }
+
+    function formatTwoDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined) {
+                        let valStr = String(r[7].v).trim();
+                        if (valStr !== '' && valStr !== '0' && valStr !== '00') {
+                            numTeFormatted = formatTwoDigits(r[7].v);
+                        }
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isDone = item.numTe !== '';
+                if (isDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predictedHeList = getPredictForKy(item.kyNum);
+                let actualNum = parseInt(item.numTe, 10);
+                
+                // Kiểm tra xem số có nằm trong khoảng từ 01 đến 49 hay không
+                let isValidRange = !isNaN(actualNum) && actualNum >= 1 && actualNum <= 49;
+
+                let killNumbers = [];
+                predictedHeList.forEach(he => {
+                    if (HE_MAP[he]) {
+                        killNumbers = killNumbers.concat(HE_MAP[he]);
+                    }
+                });
+
+                // Chỉ khi số nằm trong 01-49 và KHÔNG trùng số tuyệt sát mới tính là Trúng (isWin = true)
+                let isWin = isValidRange && !killNumbers.includes(actualNum);
+
+                evaluatedDoneList.push({ item, isWin });
+            }
+
+            let checkLatestDeletes = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestDeletes++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestDeletes >= 3) {
+                cutoffIndex = evaluatedDoneList.length;
+            } else {
+                let consecutiveDeletes = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveDeletes++;
+                        if (consecutiveDeletes >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveDeletes = 0;
+                    }
+                }
+            }
+
+            let nextKyNum = targetPredictKy;
+            let predictNextList = getPredictForKy(nextKyNum);
+            let predictNextText = predictNextList.join('');
+            let kyStrNext = String(nextKyNum).padStart(3, '0');
+
+            let htmlNextKy = `<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;height:37px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; font-size: medium;">${kyStrNext}期:<span style="color:#0000FF;">绝杀三合</span>【<span style="color:#FF0000;">${predictNextText}</span>】开<span style="color:#FF00FF;">？00</span>准</p>`;
+
+            let historyOutputs = [];
+            if (checkLatestDeletes < 3) {
+                for (let i = cutoffIndex; i < doneList.length; i++) {
+                    let item = doneList[i];
+                    let evaluated = evaluatedDoneList.find(e => e.item.kyNum === item.kyNum);
+                    if (evaluated && evaluated.isWin) {
+                        let predictedList = getPredictForKy(item.kyNum);
+                        let predictedText = predictedList.join('');
+                        let shengXiaoWin = duLieuMap[item.numTe] || '';
+                        let resStrWin = shengXiaoWin + item.numTe;
+                        let kyStr = String(item.kyNum).padStart(3, '0');
+                        historyOutputs.push(`<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;height:37px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; font-size: medium;">${kyStr}期:<span style="color:#0000FF;">绝杀三合</span>【<span style="color:#FF0000;">${predictedText}</span>】开<span style="color:#FF00FF;">${resStrWin}</span>准</p>`);
+                    }
+                }
+            }
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = String(nextKyNum + 1).padStart(3, '0');
+                let kyStr2 = String(nextKyNum + 2).padStart(3, '0');
+                let pred1 = getPredictForKy(nextKyNum + 1).join('');
+                let pred2 = getPredictForKy(nextKyNum + 2).join('');
+                let defaultHtml1 = `<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;height:37px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; font-size: medium;">${kyStr1}期:<span style="color:#0000FF;">绝杀三合</span>【<span style="color: #FF0000">$$合$$合$$合</span>】开<span style="color:#FF00FF;">？00</span>准</p>`;
+                let defaultHtml2 = `<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;height:37px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; font-size: medium;">${kyStr2}期:<span style="color:#0000FF;">绝杀三合</span>【<span style="color: #FF0000">$$合$$合$$合</span>】开<span style="color:#FF00FF;">？00</span>准</p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = String(nextKyNum + 1).padStart(3, '0');
+                let predExtra = getPredictForKy(nextKyNum + 1).join('');
+                let defaultHtmlExtra = `<p style="font-family:'Microsoft YaHei',微,sans-serif;font-weight:bold;line-height:32px;height:37px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis; font-size: medium;">${kyStrExtra}期:<span style="color:#0000FF;">绝杀三合</span>【<span style="color: #FF0000">$$合$$合$$合</span>】开<span style="color:#FF00FF;">？00</span>准</p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
