@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门六合彩【绝杀二尾】精准猛料！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}`;
+
+    let duLieuMap = {};
+
+    // Tập hợp số tương ứng cho 10 loại 尾 (Đuôi số)
+    const WEI_MAP = {
+        "0尾": [10, 20, 30, 40],
+        "1尾": [1, 11, 21, 31, 41],
+        "2尾": [2, 12, 22, 32, 42],
+        "3尾": [3, 13, 23, 33, 43],
+        "4尾": [4, 14, 24, 34, 44],
+        "5尾": [5, 15, 25, 35, 45],
+        "6尾": [6, 16, 26, 36, 46],
+        "7尾": [7, 17, 27, 37, 47],
+        "8尾": [8, 18, 28, 38, 48],
+        "9尾": [9, 19, 29, 39, 49]
+    };
+
+    const ALL_WEI = ["0尾", "1尾", "2尾", "3尾", "4尾", "5尾", "6尾", "7尾", "8尾", "9尾"];
+
+    // Bảng dữ liệu dự đoán tĩnh (2 đuôi tuyệt sát ví dụ cho các kỳ)
+    const STATIC_PREDICTIONS = {
+        1: "5尾9尾", 2: "0尾1尾", 3: "2尾3尾", 4: "4尾5尾", 5: "6尾7尾", 6: "8尾9尾", 7: "1尾2尾", 8: "3尾4尾", 9: "5尾6尾", 10: "7尾8尾"
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error("Invalid response");
+            });
+    }
+
+    // Lấy dự đoán 2 đuôi cho các kỳ
+    function getPredictForKy(kyNum) {
+        let actualKy = ((kyNum - 1) % 366) + 1;
+        if (STATIC_PREDICTIONS[actualKy]) {
+            return STATIC_PREDICTIONS[actualKy];
+        }
+        let idx1 = (actualKy * 3) % 10;
+        let idx2 = (actualKy * 7 + 4) % 10;
+        if (idx1 === idx2) idx2 = (idx2 + 1) % 10;
+        return ALL_WEI[idx1] + ALL_WEI[idx2];
+    }
+
+    function formatTwoDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    // Phân tích chuỗi 2 đuôi (ví dụ: "5尾9尾" -> ["5尾", "9尾"])
+    function parsePredictWei(predictStr) {
+        let matched = predictStr.match(/\d尾/g);
+        if (matched && matched.length >= 2) {
+            return [matched[0], matched[1]];
+        }
+        return ["5尾", "9尾"];
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined) {
+                        let valStr = String(r[7].v).trim();
+                        if (valStr !== '' && valStr !== '0' && valStr !== '00') {
+                            numTeFormatted = formatTwoDigits(r[7].v);
+                        }
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isDone = item.numTe !== '';
+                if (isDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predictedStr = getPredictForKy(item.kyNum);
+                let actualNum = parseInt(item.numTe, 10);
+                
+                let isValidRange = !isNaN(actualNum) && actualNum >= 1 && actualNum <= 49;
+                let weiPair = parsePredictWei(predictedStr);
+                
+                let killNumbers1 = WEI_MAP[weiPair[0]] || [];
+                let killNumbers2 = WEI_MAP[weiPair[1]] || [];
+                let killNumbers = [...killNumbers1, ...killNumbers2];
+
+                // Trúng khi số mở thưởng nằm trong khoảng 01-49 và KHÔNG thuộc danh sách 2 đuôi bị tuyệt sát
+                let isWin = isValidRange && !killNumbers.includes(actualNum);
+
+                evaluatedDoneList.push({ item, isWin });
+            }
+
+            let checkLatestDeletes = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestDeletes++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestDeletes >= 3) {
+                cutoffIndex = evaluatedDoneList.length;
+            } else {
+                let consecutiveDeletes = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveDeletes++;
+                        if (consecutiveDeletes >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveDeletes = 0;
+                    }
+                }
+            }
+
+            // Kỳ dự đoán chính (chưa mở thưởng)
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictForKy(nextKyNum);
+            let kyStrNext = String(nextKyNum).padStart(3, '0');
+
+            // Định dạng HTML chuẩn theo đúng mã nguồn yêu cầu
+            let htmlNextKy = `<p style="margin:0px;font-weight:bold;">${kyStrNext}期：<span style="color:#FF00FF;">绝杀二尾</span>【<span style="color:#0000FF;">${predictNext}</span>】开:<span style="color:#FF0000;">？00</span>准</p>`;
+
+            let historyOutputs = [];
+            if (checkLatestDeletes < 3) {
+                for (let i = cutoffIndex; i < doneList.length; i++) {
+                    let item = doneList[i];
+                    let evaluated = evaluatedDoneList.find(e => e.item.kyNum === item.kyNum);
+                    if (evaluated && evaluated.isWin) {
+                        let predicted = getPredictForKy(item.kyNum);
+                        let shengXiaoWin = duLieuMap[item.numTe] || '';
+                        let resStrWin = shengXiaoWin + item.numTe;
+                        let kyStr = String(item.kyNum).padStart(3, '0');
+                        
+                        historyOutputs.push(`<p style="margin:0px;font-weight:bold;">${kyStr}期：<span style="color:#FF00FF;">绝杀二尾</span>【<span style="color:#0000FF;">${predicted}</span>】开:<span style="color:#FF0000;">${resStrWin}</span>准</p>`);
+                    }
+                }
+            }
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            // Nếu lịch sử bị xóa do thua 3 kỳ liên tiếp, bổ sung các kỳ mặc định chứa $尾
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = String(nextKyNum + 1).padStart(3, '0');
+                let kyStr2 = String(nextKyNum + 2).padStart(3, '0');
+                let defaultHtml1 = `<p style="margin:0px;font-weight:bold;">${kyStr1}期：<span style="color:#FF00FF;">绝杀二尾</span>【<span style="color:#0000FF;">$尾$尾</span>】开:<span style="color:#FF0000;">？00</span>准</p>`;
+                let defaultHtml2 = `<p style="margin:0px;font-weight:bold;">${kyStr2}期：<span style="color:#FF00FF;">绝杀二尾</span>【<span style="color:#0000FF;">$尾$尾</span>】开:<span style="color:#FF0000;">？00</span>准</p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = String(nextKyNum + 1).padStart(3, '0');
+                let defaultHtmlExtra = `<p style="margin:0px;font-weight:bold;">${kyStrExtra}期：<span style="color:#FF00FF;">绝杀二尾</span>【<span style="color:#0000FF;">$尾$尾</span>】开:<span style="color:#FF0000;">？00</span>准</p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
