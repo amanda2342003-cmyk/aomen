@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳门六合彩【杀半波】精准猛料！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5px;
+            background-color: #fff;
+            color: #000;
+        }
+        .content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div id="content-container" class="content"></div>
+
+<script>
+    const SPREADSHEET_ID = '19wtMwveTJ_eW09pp7ANQj1NkLNbHIA4kWLsoNAk5Xd8';
+    const SHEET_NAME_KQ = 'KQ_AOMEN';
+    const SHEET_NAME_DULIEU = 'DULIEU';
+
+    const URL_KQ = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_KQ}`;
+    const URL_DULIEU = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME_DULIEU}`;
+
+    let duLieuMap = {};
+
+    // 6 tập hợp số tương ứng cho 半波 (Bán Ba)
+    const BANBO_MAP = {
+        "红双": [2, 8, 12, 18, 24, 30, 34, 40, 46],
+        "红单": [1, 7, 13, 19, 23, 29, 35, 45],
+        "蓝双": [4, 10, 14, 20, 26, 36, 42, 48],
+        "蓝单": [3, 9, 15, 25, 31, 37, 41, 47],
+        "绿双": [6, 16, 22, 28, 32, 38, 44],
+        "绿单": [5, 11, 17, 21, 27, 33, 39, 43, 49]
+    };
+
+    const ALL_BANBO = ["红双", "红单", "蓝双", "蓝单", "绿双", "绿单"];
+
+    // Bảng dữ liệu dự đoán tĩnh (ví dụ từ kỳ 1-10, bạn có thể bổ sung từ 1 đến 366)
+    const STATIC_PREDICTIONS = {
+      1: "蓝双", 2: "红双", 3: "绿单", 4: "红单", 5: "红双", 6: "蓝单", 7: "绿单", 8: "红双", 9: "蓝单", 10: "红双", 11: "绿单", 12: "红双", 13: "绿单", 14: "蓝双", 15: "红单", 16: "绿单", 17: "绿双", 18: "红单", 19: "蓝双", 20: "绿双", 21: "红双", 22: "蓝双", 23: "红单", 24: "绿双", 25: "蓝单", 26: "绿双", 27: "蓝单", 28: "红单", 29: "绿双", 30: "蓝单", 31: "蓝单", 32: "红单", 33: "蓝单", 34: "绿双", 35: "红单", 36: "蓝单", 37: "绿双", 38: "蓝双", 39: "红单", 40: "绿双", 41: "蓝单", 42: "红单", 43: "绿单", 44: "绿双", 45: "蓝单", 46: "红单", 47: "蓝双", 48: "红双", 49: "绿双", 50: "蓝双", 51: "绿双", 52: "蓝双", 53: "绿双", 54: "红单", 55: "红单", 56: "绿单", 57: "红单", 58: "蓝单", 59: "红单", 60: "绿双", 61: "红双", 62: "蓝单", 63: "绿单", 64: "蓝单", 65: "绿双", 66: "红双", 67: "绿单", 68: "红单", 69: "绿双", 70: "蓝双", 71: "红单", 72: "绿双", 73: "红单", 74: "红双", 75: "绿单", 76: "蓝双", 77: "红双", 78: "绿单", 79: "红单", 80: "绿单", 81: "蓝双", 82: "绿双", 83: "蓝双", 84: "红双", 85: "绿单", 86: "蓝单", 87: "红双", 88: "红单", 89: "蓝单", 90: "绿单", 91: "蓝双", 92: "绿单", 93: "红双", 94: "蓝单", 95: "红单", 96: "蓝单", 97: "绿双", 98: "蓝单", 99: "绿双", 100: "蓝双", 101: "绿单", 102: "蓝双", 103: "红单", 104: "绿双", 105: "绿双", 106: "红单", 107: "蓝双", 108: "红双", 109: "绿双", 110: "红单", 111: "绿单", 112: "红单", 113: "蓝单", 114: "绿双", 115: "红双", 116: "红单", 117: "蓝单", 118: "绿双", 119: "蓝双", 120: "红单", 121: "绿单", 122: "红双", 123: "绿单", 124: "蓝单", 125: "绿单", 126: "蓝单", 127: "绿单", 128: "绿双", 129: "蓝双", 130: "绿单", 131: "蓝双", 132: "绿单", 133: "红双", 134: "蓝双", 135: "绿单", 136: "蓝双", 137: "红双", 138: "蓝单", 139: "蓝双", 140: "绿双", 141: "蓝双", 142: "绿单", 143: "蓝双", 144: "红双", 145: "绿双", 146: "蓝双", 147: "红双", 148: "绿单", 149: "蓝双", 150: "绿单", 151: "红双", 152: "蓝双", 153: "绿单", 154: "绿双", 155: "蓝双", 156: "绿双", 157: "蓝双", 158: "绿单", 159: "蓝单", 160: "绿单", 161: "红单", 162: "绿双", 163: "红单", 164: "蓝单", 165: "蓝双", 166: "红双", 167: "绿单", 168: "蓝双", 169: "红双", 170: "蓝双", 171: "红双", 172: "绿单", 173: "红单", 174: "绿双", 175: "红双", 176: "绿单", 177: "红双", 178: "绿单", 179: "绿单", 180: "红双", 181: "绿双", 182: "蓝双", 183: "绿单", 184: "蓝单", 185: "绿双", 186: "蓝单", 187: "绿双", 188: "蓝双", 189: "红单", 190: "红单", 191: "绿单", 192: "红双", 193: "蓝单", 194: "绿双", 195: "蓝单", 196: "红双", 197: "绿双", 198: "蓝单", 199: "绿双", 200: "红单", 201: "绿双", 202: "绿单", 203: "红单", 204: "蓝单", 205: "红单", 206: "蓝单", 207: "绿单", 208: "蓝双", 209: "红双", 210: "蓝双", 211: "红单", 212: "蓝单", 213: "红双", 214: "蓝单", 215: "绿单", 216: "红单", 217: "绿单", 218: "绿单", 219: "蓝双", 220: "红双", 221: "绿单", 222: "蓝双", 223: "绿单", 224: "蓝双", 225: "绿单", 226: "蓝单", 227: "绿双", 228: "红双", 229: "蓝双", 230: "蓝双", 231: "红单", 232: "蓝单", 233: "绿单", 234: "红单", 235: "蓝双", 236: "绿单", 237: "红双", 238: "绿单", 239: "蓝双", 240: "红单", 241: "红双", 242: "蓝单", 243: "绿单", 244: "蓝双", 245: "绿双", 246: "蓝单", 247: "红单", 248: "蓝双", 249: "绿双", 250: "蓝单", 251: "绿单", 252: "蓝单", 253: "蓝单", 254: "红单", 255: "绿双", 256: "红单", 257: "绿单", 258: "红单", 259: "绿双", 260: "红单", 261: "绿单", 262: "蓝双", 263: "绿单", 264: "蓝单", 265: "红单", 266: "蓝双", 267: "绿双", 268: "红单", 269: "红双", 270: "蓝单", 271: "红双", 272: "蓝双", 273: "绿双", 274: "红单", 275: "绿单", 276: "红单", 277: "绿单", 278: "红单", 279: "蓝单", 280: "绿单", 281: "红单", 282: "蓝双", 283: "红单", 284: "红双", 285: "绿单", 286: "蓝双", 287: "绿单", 288: "红单", 289: "蓝单", 290: "红单", 291: "绿双", 292: "红双", 293: "绿双", 294: "蓝双", 295: "绿双", 296: "绿单", 297: "红双", 298: "蓝双", 299: "红单", 300: "蓝单", 301: "蓝双", 302: "绿双", 303: "绿双", 304: "红单", 305: "蓝单", 306: "绿双", 307: "蓝双", 308: "红双", 309: "绿双", 310: "红双", 311: "绿双", 312: "蓝双", 313: "红单", 314: "蓝双", 315: "蓝双", 316: "绿双", 317: "红双", 318: "蓝单", 319: "红双", 320: "蓝单", 321: "绿单", 322: "红单", 323: "蓝单", 324: "绿双", 325: "蓝双", 326: "蓝双", 327: "绿单", 328: "蓝单", 329: "红双", 330: "蓝双", 331: "红双", 332: "蓝双", 333: "绿单", 334: "蓝双", 335: "绿单", 336: "蓝单", 337: "绿双", 338: "蓝单", 339: "红双", 340: "蓝单", 341: "蓝双", 342: "红双", 343: "绿双", 344: "蓝单", 345: "红双", 346: "绿双", 347: "红单", 348: "绿双", 349: "红单", 350: "绿单", 351: "红单", 352: "蓝双", 353: "蓝单", 354: "绿单", 355: "红单", 356: "绿双", 357: "蓝单", 358: "绿双", 359: "红双", 360: "绿单", 361: "红单", 362: "绿单", 363: "蓝双", 364: "绿单", 365: "绿单", 366: "蓝双"
+    };
+
+    function fetchJSONP(url) {
+        return fetch(url)
+            .then(res => res.text())
+            .then(text => {
+                const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/);
+                if (match && match[1]) return JSON.parse(match[1]);
+                throw new Error("Invalid response");
+            });
+    }
+
+    // Lấy dự đoán chuẩn từ 6 lựa chọn cho các kỳ
+    function getPredictForKy(kyNum) {
+        let actualKy = ((kyNum - 1) % 366) + 1;
+        if (STATIC_PREDICTIONS[actualKy]) {
+            return STATIC_PREDICTIONS[actualKy];
+        }
+        let idx = (actualKy * 7 + 3) % 6;
+        return ALL_BANBO[idx];
+    }
+
+    function formatTwoDigits(val) {
+        let num = parseInt(String(val).replace(/\D/g, ''), 10);
+        if (isNaN(num)) return '';
+        return String(num).padStart(2, '0');
+    }
+
+    async function initPredict() {
+        try {
+            const rawRules = await fetchJSONP(URL_DULIEU);
+            if (rawRules.table && rawRules.table.rows) {
+                rawRules.table.rows.forEach(r => {
+                    if (r.c && r.c[0] && r.c[0].v !== null && r.c[0].v !== undefined) {
+                        let formattedNum = formatTwoDigits(r.c[0].v);
+                        let animal = (r.c[1] && r.c[1].v !== null && r.c[1].v !== undefined) ? String(r.c[1].v).trim() : '';
+                        if (formattedNum && animal) {
+                            duLieuMap[formattedNum] = animal;
+                        }
+                    }
+                });
+            }
+
+            const rawKQ = await fetchJSONP(URL_KQ);
+            const rows = rawKQ.table.rows;
+            let parsedList = [];
+
+            if (rows) {
+                for (let i = 0; i < rows.length; i++) {
+                    const r = rows[i].c;
+                    if (!r || !r[0] || r[0].v === null || r[0].v === undefined) continue;
+                    
+                    let kyRaw = String(r[0].v).trim();
+                    let kyOnlyNum = parseInt(kyRaw.replace(/\D/g, ''), 10) || 0;
+                    
+                    let numTeFormatted = '';
+                    if (r[7] && r[7].v !== null && r[7].v !== undefined) {
+                        let valStr = String(r[7].v).trim();
+                        if (valStr !== '' && valStr !== '0' && valStr !== '00') {
+                            numTeFormatted = formatTwoDigits(r[7].v);
+                        }
+                    }
+
+                    if (kyOnlyNum > 0) {
+                        parsedList.push({
+                            kyNum: kyOnlyNum,
+                            numTe: numTeFormatted
+                        });
+                    }
+                }
+            }
+
+            let doneList = [];
+            let pendingKyObj = null;
+
+            for (let i = 0; i < parsedList.length; i++) {
+                let item = parsedList[i];
+                let isDone = item.numTe !== '';
+                if (isDone) {
+                    doneList.push(item);
+                } else {
+                    pendingKyObj = item;
+                }
+            }
+
+            let targetPredictKy = 1;
+            if (pendingKyObj) {
+                targetPredictKy = pendingKyObj.kyNum;
+            } else if (doneList.length > 0) {
+                targetPredictKy = doneList[doneList.length - 1].kyNum + 1;
+            }
+
+            let evaluatedDoneList = [];
+            for (let i = 0; i < doneList.length; i++) {
+                let item = doneList[i];
+                let predictedBanbo = getPredictForKy(item.kyNum);
+                let actualNum = parseInt(item.numTe, 10);
+                
+                let isValidRange = !isNaN(actualNum) && actualNum >= 1 && actualNum <= 49;
+                let killNumbers = BANBO_MAP[predictedBanbo] || [];
+
+                // Trúng khi số mở thưởng nằm trong khoảng 01-49 và KHÔNG thuộc danh sách số bị tuyệt sát
+                let isWin = isValidRange && !killNumbers.includes(actualNum);
+
+                evaluatedDoneList.push({ item, isWin });
+            }
+
+            let checkLatestDeletes = 0;
+            for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                if (!evaluatedDoneList[i].isWin) {
+                    checkLatestDeletes++;
+                } else {
+                    break;
+                }
+            }
+
+            let cutoffIndex = 0;
+            if (checkLatestDeletes >= 3) {
+                cutoffIndex = evaluatedDoneList.length;
+            } else {
+                let consecutiveDeletes = 0;
+                for (let i = evaluatedDoneList.length - 1; i >= 0; i--) {
+                    if (!evaluatedDoneList[i].isWin) {
+                        consecutiveDeletes++;
+                        if (consecutiveDeletes >= 3) {
+                            cutoffIndex = i + 1;
+                            break;
+                        }
+                    } else {
+                        consecutiveDeletes = 0;
+                    }
+                }
+            }
+
+            // Kỳ dự đoán chính (chưa mở thưởng)
+            let nextKyNum = targetPredictKy;
+            let predictNext = getPredictForKy(nextKyNum);
+            let kyStrNext = String(nextKyNum).padStart(3, '0');
+
+            // Định dạng HTML chuẩn của mã gốc
+            let htmlNextKy = `<p style="margin:0px;"><strong>${kyStrNext}期：</strong><span style="padding:0px;margin:0px;border:0px;box-sizing:border-box;color:#009933;"><strong>杀半波</strong></span>【<span style="color: #FF0000"><strong>${predictNext}</strong></span>】开:<strong><span style="color:#FF0000;">？00</span><span style="color:#000000;">准</span></strong></p>`;
+
+            let historyOutputs = [];
+            if (checkLatestDeletes < 3) {
+                for (let i = cutoffIndex; i < doneList.length; i++) {
+                    let item = doneList[i];
+                    let evaluated = evaluatedDoneList.find(e => e.item.kyNum === item.kyNum);
+                    if (evaluated && evaluated.isWin) {
+                        let predicted = getPredictForKy(item.kyNum);
+                        let shengXiaoWin = duLieuMap[item.numTe] || '';
+                        let resStrWin = shengXiaoWin + item.numTe;
+                        let kyStr = String(item.kyNum).padStart(3, '0');
+                        
+                        historyOutputs.push(`<p style="margin:0px;"><strong>${kyStr}期：</strong><span style="padding:0px;margin:0px;border:0px;box-sizing:border-box;color:#009933;"><strong>杀半波</strong></span>【<span style="color: #FF0000"><strong>${predicted}</strong></span>】开:<strong><span style="color:#FF0000;">${resStrWin}</span><span style="color:#000000;">准</span></strong></p>`);
+                    }
+                }
+            }
+            historyOutputs.reverse();
+
+            let finalOutputs = [htmlNextKy, ...historyOutputs];
+
+            // Nếu lịch sử bị xóa do thua 3 kỳ liên tiếp, bổ sung các kỳ mặc định chứa 發發
+            let currentCount = finalOutputs.length;
+            if (currentCount === 1) {
+                let kyStr1 = String(nextKyNum + 1).padStart(3, '0');
+                let kyStr2 = String(nextKyNum + 2).padStart(3, '0');
+                let defaultHtml1 = `<p style="margin:0px;"><strong>${kyStr1}期：</strong><span style="padding:0px;margin:0px;border:0px;box-sizing:border-box;color:#009933;"><strong>杀半波</strong></span>【<span style="color: #FF0000"><strong>發發</strong></span>】开:<strong><span style="color:#FF0000;">？00</span><span style="color:#000000;">准</span></strong></p>`;
+                let defaultHtml2 = `<p style="margin:0px;"><strong>${kyStr2}期：</strong><span style="padding:0px;margin:0px;border:0px;box-sizing:border-box;color:#009933;"><strong>杀半波</strong></span>【<span style="color: #FF0000"><strong>發發</strong></span>】开:<strong><span style="color:#FF0000;">？00</span><span style="color:#000000;">准</span></strong></p>`;
+                finalOutputs.unshift(defaultHtml1);
+                finalOutputs.unshift(defaultHtml2);
+            } else if (currentCount === 2) {
+                let kyStrExtra = String(nextKyNum + 1).padStart(3, '0');
+                let defaultHtmlExtra = `<p style="margin:0px;"><strong>${kyStrExtra}期：</strong><span style="padding:0px;margin:0px;border:0px;box-sizing:border-box;color:#009933;"><strong>杀半波</strong></span>【<span style="color: #FF0000"><strong>發發</strong></span>】开:<strong><span style="color:#FF0000;">？00</span><span style="color:#000000;">准</span></strong></p>`;
+                finalOutputs.unshift(defaultHtmlExtra);
+            }
+
+            document.getElementById('content-container').innerHTML = finalOutputs.join('');
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('content-container').innerHTML = ' ';
+        }
+    }
+    initPredict();
+</script>
+
+</body>
+</html>
